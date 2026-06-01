@@ -144,9 +144,11 @@
 
   /* ===== breezeアニメ（bobレイヤーに適用） ===== */
   @keyframes char-breeze {
-    /* ① ジェットコースターの宙返り：位置はそのままに円を描いて一回転 */
+    /* ① 風でまず少し右へ流れる */
     0%   { transform: rotate(0deg)   translateX(0)      translateY(0);    opacity:1; }
-    30%  { transform: rotate(360deg) translateX(0)      translateY(0);    opacity:1; }
+    14%  { transform: rotate(0deg)   translateX(60px)   translateY(-6px); opacity:1; }
+    /* ② ジェットコースターの宙返り：位置はそのままに円を描いて一回転 */
+    40%  { transform: rotate(360deg) translateX(60px)   translateY(-6px); opacity:1; }
     /* ② 一回転したあと、風で右へ吹き飛ぶ */
     46%  { transform: rotate(360deg) translateX(140vw)  translateY(-30px);opacity:1; }
     47%  { transform: rotate(360deg) translateX(140vw)  translateY(-30px);opacity:0; }
