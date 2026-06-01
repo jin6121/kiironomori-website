@@ -10,6 +10,8 @@
     --ink-sub:#6f8a52;
     --btn:    #7fae3a;
     --btn-dk: #5c8a24;
+    --breeze:    #5ab4d6;
+    --breeze-dk: #3a94b6;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -88,26 +90,71 @@
   #notice .line{ margin:12px auto 0; width:34px; height:1px; background:var(--ink-sub); opacity:0.5; }
   #notice .sub{ margin-top:10px; font-size:12px; letter-spacing:0.18em; }
 
-  #dance-btn{
+  #btn-group{
     position: fixed;
     left: 50%; bottom: 34px;
     transform: translateX(-50%);
     z-index: 30;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  #btn-group button{
     border: none;
     cursor: pointer;
-    padding: 13px 34px;
+    padding: 13px 30px;
     border-radius: 999px;
     font-family: inherit;
     font-size: 15px;
     letter-spacing: 0.14em;
     color: #fff;
-    background: var(--btn);
-    box-shadow: 0 6px 16px rgba(92,138,36,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
     transition: transform .12s ease, box-shadow .2s ease, background .2s ease;
   }
+  #dance-btn{
+    background: var(--btn);
+    box-shadow: 0 6px 16px rgba(92,138,36,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
   #dance-btn:hover{ background: var(--btn-dk); box-shadow: 0 8px 20px rgba(92,138,36,0.45), inset 0 1px 0 rgba(255,255,255,0.35); }
-  #dance-btn:active{ transform: translateX(-50%) scale(0.96); }
+  #dance-btn:active{ transform: scale(0.96); }
   #dance-btn.on{ background: var(--btn-dk); }
+  #breeze-btn{
+    background: var(--breeze);
+    box-shadow: 0 6px 16px rgba(58,148,182,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  #breeze-btn:hover{ background: var(--breeze-dk); box-shadow: 0 8px 20px rgba(58,148,182,0.45), inset 0 1px 0 rgba(255,255,255,0.35); }
+  #breeze-btn:active{ transform: scale(0.96); }
+  #breeze-btn:disabled{ opacity: 0.55; cursor: default; transform: none; }
+
+  /* ===== 風ライン ===== */
+  @keyframes wind-streak {
+    0%   { transform: translateX(-120%); opacity: 0; }
+    8%   { opacity: 1; }
+    88%  { opacity: 0.7; }
+    100% { transform: translateX(110vw); opacity: 0; }
+  }
+  .wind-line {
+    position: fixed;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(190,230,255,0.9), rgba(255,255,255,1), rgba(190,230,255,0.7), transparent);
+    border-radius: 999px;
+    pointer-events: none;
+    z-index: 50;
+    animation: wind-streak linear forwards;
+  }
+
+  /* ===== breezeアニメ（bobレイヤーに適用） ===== */
+  @keyframes char-breeze {
+    0%   { transform: translateX(0)      translateY(0)    rotate(0deg);   opacity:1; }
+    10%  { transform: translateX(18px)   translateY(-10px) rotate(14deg); opacity:1; }
+    34%  { transform: translateX(140vw)  translateY(-35px) rotate(48deg); opacity:1; }
+    35%  { transform: translateX(140vw)  translateY(-35px) rotate(48deg); opacity:0; }
+    36%  { transform: translateX(-120vw) translateY(-10px) rotate(-28deg);opacity:0; }
+    54%  { transform: translateX(-120vw) translateY(-10px) rotate(-28deg);opacity:0; }
+    56%  { transform: translateX(-100vw) translateY(5px)  rotate(-18deg); opacity:1; }
+    78%  { transform: translateX(14px)   translateY(-5px)  rotate(-7deg); opacity:1; }
+    90%  { transform: translateX(-5px)   translateY(0)    rotate(2deg);   opacity:1; }
+    100% { transform: translateX(0)      translateY(0)    rotate(0deg);   opacity:1; }
+  }
 
   /* ========== キャラ共通 ========== */
   .char-orbit { position: absolute; z-index: 15; }
@@ -182,7 +229,10 @@
 </div>
 
 
-<button id="dance-btn" type="button">dance ♪</button>
+<div id="btn-group">
+  <button id="dance-btn" type="button">dance ♪</button>
+  <button id="breeze-btn" type="button">breeze 🌬</button>
+</div>
 
 <script>
 // ===== 表示サイズ =====
@@ -204,8 +254,9 @@ const CHARS = [
   { name:'trees', bodyAnim:'body-spin',   legAnim:'legs-still',  bodyDur:5.00, legDur:1.00, phase:5/6, full:true },
 ];
 
-const stage = document.getElementById('stage');
-const btn   = document.getElementById('dance-btn');
+const stage     = document.getElementById('stage');
+const btn       = document.getElementById('dance-btn');
+const breezeBtn = document.getElementById('breeze-btn');
 
 let dancing = false;
 let items = [];   // {orbit, flip, phase}
@@ -265,7 +316,8 @@ function build() {
     // ふわふわ浮遊レイヤー（常時・キャラごとに少しずらす）
     const bob = document.createElement('div');
     bob.className = 'char-bob';
-    bob.style.animation = `float-bob ${(3.4 + i*0.4).toFixed(1)}s ease-in-out ${(i*0.5).toFixed(1)}s infinite`;
+    const bobAnim = `float-bob ${(3.4 + i*0.4).toFixed(1)}s ease-in-out ${(i*0.5).toFixed(1)}s infinite`;
+    bob.style.animation = bobAnim;
 
     // 向きレイヤー
     const flip = document.createElement('div');
@@ -317,7 +369,7 @@ function build() {
     orbit.appendChild(bob);
     stage.appendChild(orbit);
 
-    items.push({ orbit, flip, phase: c.phase });
+    items.push({ orbit, flip, bob, bobAnim, phase: c.phase });
 
     // 進行方向で左右反転（dance中のみ作動）
     (function loop() {
@@ -336,6 +388,48 @@ function build() {
 btn.addEventListener('click', () => {
   dancing = !dancing;
   applyMode();
+});
+
+// ===== breeze =====
+let breezing = false;
+
+breezeBtn.addEventListener('click', () => {
+  if (breezing) return;
+  breezing = true;
+  breezeBtn.disabled = true;
+
+  // 風ライン生成
+  const lineCount = 14;
+  for (let i = 0; i < lineCount; i++) {
+    const line = document.createElement('div');
+    line.className = 'wind-line';
+    const w     = 60 + Math.random() * 220;
+    const top   = Math.random() * window.innerHeight;
+    const delay = Math.random() * 0.55;
+    const dur   = 0.28 + Math.random() * 0.38;
+    line.style.cssText = `width:${w}px; top:${top}px; left:0; animation-duration:${dur}s; animation-delay:${delay}s;`;
+    document.body.appendChild(line);
+    setTimeout(() => line.remove(), (delay + dur + 0.15) * 1000);
+  }
+
+  // キャラをばたばたと飛ばす（少しずつずらして）
+  const BREEZE_DUR = 2700;
+  items.forEach((it, i) => {
+    const stagger = i * 70;
+    setTimeout(() => {
+      it.bob.style.animation = `char-breeze ${BREEZE_DUR}ms ease-in-out forwards`;
+    }, stagger);
+    // 終了後に元のふわふわアニメに戻す
+    setTimeout(() => {
+      it.bob.style.animation = it.bobAnim;
+    }, stagger + BREEZE_DUR);
+  });
+
+  // 全員戻ったらボタン解除
+  setTimeout(() => {
+    breezing = false;
+    breezeBtn.disabled = false;
+  }, BREEZE_DUR + items.length * 70 + 100);
 });
 
 build();
