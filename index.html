@@ -144,22 +144,24 @@
 
   /* ===== breezeアニメ（bobレイヤーに適用） ===== */
   @keyframes char-breeze {
-    0%   { transform: translateX(0)      translateY(0)    rotate(0deg);   opacity:1; }
-    10%  { transform: translateX(18px)   translateY(-10px) rotate(20deg); opacity:1; }
-    22%  { transform: translateX(45vw)   translateY(-28px) rotate(190deg);opacity:1; }
-    34%  { transform: translateX(140vw)  translateY(-35px) rotate(360deg);opacity:1; }
-    35%  { transform: translateX(140vw)  translateY(-35px) rotate(360deg);opacity:0; }
-    36%  { transform: translateX(-120vw) translateY(-10px) rotate(-28deg);opacity:0; }
-    54%  { transform: translateX(-120vw) translateY(-10px) rotate(-28deg);opacity:0; }
-    56%  { transform: translateX(-100vw) translateY(5px)  rotate(-18deg); opacity:1; }
-    78%  { transform: translateX(14px)   translateY(-5px)  rotate(-7deg); opacity:1; }
-    90%  { transform: translateX(-5px)   translateY(0)    rotate(2deg);   opacity:1; }
-    100% { transform: translateX(0)      translateY(0)    rotate(0deg);   opacity:1; }
+    /* ① ジェットコースターの宙返り：位置はそのままに円を描いて一回転 */
+    0%   { transform: rotate(0deg)   translateX(0)      translateY(0);    opacity:1; }
+    30%  { transform: rotate(360deg) translateX(0)      translateY(0);    opacity:1; }
+    /* ② 一回転したあと、風で右へ吹き飛ぶ */
+    46%  { transform: rotate(360deg) translateX(140vw)  translateY(-30px);opacity:1; }
+    47%  { transform: rotate(360deg) translateX(140vw)  translateY(-30px);opacity:0; }
+    /* ③ 反対（左）からゆっくり戻ってくる */
+    48%  { transform: rotate(360deg) translateX(-120vw) translateY(-10px);opacity:0; }
+    62%  { transform: rotate(360deg) translateX(-120vw) translateY(-10px);opacity:0; }
+    64%  { transform: rotate(360deg) translateX(-100vw) translateY(5px);  opacity:1; }
+    84%  { transform: rotate(360deg) translateX(14px)   translateY(-5px); opacity:1; }
+    93%  { transform: rotate(360deg) translateX(-5px)   translateY(0);    opacity:1; }
+    100% { transform: rotate(360deg) translateX(0)      translateY(0);    opacity:1; }
   }
 
   /* ========== キャラ共通 ========== */
   .char-orbit { position: absolute; z-index: 15; }
-  .char-bob   { width:100%; height:100%; }            /* ふわふわ上下 */
+  .char-bob   { width:100%; height:100%; transform-origin:50% -30px; } /* ふわふわ上下 / 宙返りの中心はキャラの少し上 */
   .char-flip  { width:100%; height:100%; transition: transform .25s ease; }  /* 向き */
   .char-body-wrap { display:flex; flex-direction:column; align-items:center; } /* 揺れ */
 
