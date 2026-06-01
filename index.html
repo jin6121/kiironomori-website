@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>合同会社 きいろのもり</title>
+<style>
+  :root{
+    --ink:    #3f5a2c;
+    --ink-sub:#6f8a52;
+    --btn:    #7fae3a;
+    --btn-dk: #5c8a24;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
+
+  body {
+    overflow: hidden;
+    font-family: 'Hiragino Maru Gothic ProN', 'Kosugi Maru', sans-serif;
+    background: #eef3e4;
+  }
+
+  /* ===== 背景 ===== */
+  #bg {
+    position: fixed;
+    inset: 0;
+    background: url('background.png') center center / cover no-repeat;
+    z-index: 0;
+    /* 後ろに退かせる：少し明るく・ほんのりぼかす（scaleは縁のにじみ防止） */
+    filter: saturate(0.96) brightness(1.10) blur(2.5px);
+    transform: scale(1.05);
+  }
+  #bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(rgba(255,255,255,0.46), rgba(255,255,255,0.46)),
+      radial-gradient(120% 90% at 50% 45%,
+        rgba(255,255,255,0.22) 0%,
+        rgba(255,255,255,0.00) 70%);
+  }
+
+  /* ===== ステージ ===== */
+  #stage { position: fixed; inset: 0; z-index: 10; }
+
+  /* ===== ロゴ ===== */
+  #logo-wrap {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    text-align: center;
+    pointer-events: none;
+  }
+  /* 白い光は廃止。ロゴ自体の影で視認性を確保（下の img filter 参照） */
+  #logo-wrap img {
+    display: block;
+    margin: 0 auto;
+    width: 260px;
+    height: auto;
+    /* 白い箱・光なしで読めるよう、ロゴに柔らかい影を付ける */
+    filter: drop-shadow(0 2px 9px rgba(40,60,20,0.30))
+            drop-shadow(0 1px 2px rgba(40,60,20,0.38));
+  }
+  .tagline{
+    margin-top: 18px;
+    color: var(--ink);
+    font-size: 15px;
+    letter-spacing: 0.22em;
+    text-indent: 0.22em;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.85);
+  }
+
+  /* ===== 下部UI ===== */
+  #notice{
+    position: fixed;
+    left: 50%; bottom: 96px;
+    transform: translateX(-50%);
+    z-index: 25;
+    text-align: center;
+    color: var(--ink-sub);
+    text-shadow: 0 1px 2px rgba(255,255,255,0.85);
+    pointer-events:none;
+  }
+  #notice .lead{ font-size:13px; letter-spacing:0.42em; text-indent:0.42em; opacity:0.9; }
+  #notice .line{ margin:12px auto 0; width:34px; height:1px; background:var(--ink-sub); opacity:0.5; }
+  #notice .sub{ margin-top:10px; font-size:12px; letter-spacing:0.18em; }
+
+  #dance-btn{
+    position: fixed;
+    left: 50%; bottom: 34px;
+    transform: translateX(-50%);
+    z-index: 30;
+    border: none;
+    cursor: pointer;
+    padding: 13px 34px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 15px;
+    letter-spacing: 0.14em;
+    color: #fff;
+    background: var(--btn);
+    box-shadow: 0 6px 16px rgba(92,138,36,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+    transition: transform .12s ease, box-shadow .2s ease, background .2s ease;
+  }
+  #dance-btn:hover{ background: var(--btn-dk); box-shadow: 0 8px 20px rgba(92,138,36,0.45), inset 0 1px 0 rgba(255,255,255,0.35); }
+  #dance-btn:active{ transform: translateX(-50%) scale(0.96); }
+  #dance-btn.on{ background: var(--btn-dk); }
+
+  /* ========== キャラ共通 ========== */
+  .char-orbit { position: absolute; z-index: 15; }
+  .char-bob   { width:100%; height:100%; }            /* ふわふわ上下 */
+  .char-flip  { width:100%; height:100%; transition: transform .25s ease; }  /* 向き */
+  .char-body-wrap { display:flex; flex-direction:column; align-items:center; } /* 揺れ */
+
+  .c-body { background-repeat:no-repeat; background-size:var(--bw) var(--bh); }
+  .c-legs { background-repeat:no-repeat; background-size:var(--bw) var(--lh); transform-origin:center top; }
+
+  /* ===== 軌道 ===== */
+  @keyframes orbit { from{offset-distance:0%} to{offset-distance:100%} }
+
+  /* ===== ふわふわ浮遊 ===== */
+  @keyframes float-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+
+  /* ===== 体（上品な小さい揺れ） ===== */
+  @keyframes body-walk  { 0%,100%{transform:translateY(0) rotate(-1.5deg)} 50%{transform:translateY(-5px) rotate(1.5deg)} }
+  @keyframes body-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.10)} }
+  @keyframes body-flap  { 0%,100%{transform:rotate(-9deg) translateY(-2px)} 50%{transform:rotate(9deg) translateY(-2px)} }
+  @keyframes body-sway  { 0%,100%{transform:rotate(-4deg)} 50%{transform:rotate(4deg)} }
+  @keyframes body-fairy {
+    0%{transform:translateY(0) rotate(-2deg)}
+    35%{transform:translateY(-9px) rotate(2deg) scale(1.04)}
+    70%{transform:translateY(-4px) rotate(-1deg)}
+    100%{transform:translateY(0) rotate(-2deg)}
+  }
+  @keyframes body-bounce {
+    0%,100%{transform:translateY(0) scaleY(1)}
+    40%{transform:translateY(-9px) scaleY(1.03)}
+    70%{transform:translateY(0) scaleY(0.94)}
+    85%{transform:translateY(-3px) scaleY(1.01)}
+  }
+  @keyframes body-spin {
+    0%,45%{transform:scaleX(1)}
+    50%,95%{transform:scaleX(-1)}
+    100%{transform:scaleX(1)}
+  }
+  @keyframes fairy-full {
+    0%{transform:rotate(0deg) translateX(0)}
+    10%{transform:rotate(0deg) translateX(-4px)}
+    20%{transform:rotate(0deg) translateX(4px)}
+    30%{transform:rotate(0deg) translateX(-4px)}
+    40%{transform:rotate(0deg) translateX(0)}
+    50%{transform:rotate(360deg) translateX(0)}
+    60%{transform:rotate(360deg) translateX(-4px)}
+    70%{transform:rotate(360deg) translateX(4px)}
+    80%{transform:rotate(360deg) translateX(-4px)}
+    90%{transform:rotate(360deg) translateX(0)}
+    100%{transform:rotate(720deg) translateX(0)}
+  }
+
+  /* ===== 足 ===== */
+  @keyframes legs-walk  { 0%{transform:rotate(-10deg)} 50%{transform:rotate(10deg)} 100%{transform:rotate(-10deg)} }
+  @keyframes legs-fairy { 0%,100%{transform:rotate(0deg) scaleY(1)} 25%{transform:rotate(-8deg) scaleY(0.95)} 75%{transform:rotate(8deg) scaleY(0.95)} }
+  @keyframes legs-still { 0%,100%{transform:rotate(0deg)} }
+  @keyframes legs-bounce{ 0%,100%{transform:scaleY(1)} 40%{transform:scaleY(0.85) rotate(3deg)} 60%{transform:scaleY(1.08)} }
+
+  @media (prefers-reduced-motion: reduce){
+    .char-bob, .char-body-wrap, .c-legs { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="bg"></div>
+
+<div id="stage">
+  <div id="logo-wrap">
+    <img src="logo.png" alt="合同会社 きいろのもり">
+  </div>
+</div>
+
+
+<button id="dance-btn" type="button">dance ♪</button>
+
+<script>
+// ===== 表示サイズ =====
+const DISP_W  = 150;
+const SCALE   = DISP_W / 938;
+const DISP_BH = Math.round(476 * SCALE);
+const DISP_LH = Math.round(292 * SCALE);
+const FULL_H  = Math.round(768 * SCALE);
+
+const ORBIT_DUR = 40;   // 回転モードの一周（秒）
+
+// キャラ定義
+const CHARS = [
+  { name:'fruit', bodyAnim:'body-flap',   legAnim:'legs-still',  bodyDur:0.85, legDur:1.00, phase:0/6 },
+  { name:'sun',   bodyAnim:'body-pulse',  legAnim:'legs-still',  bodyDur:2.00, legDur:1.00, phase:1/6 },
+  { name:'stump', bodyAnim:'body-bounce', legAnim:'legs-bounce', bodyDur:1.80, legDur:1.80, phase:2/6, full:true },
+  { name:'leaf',  bodyAnim:'body-sway',   legAnim:'legs-still',  bodyDur:3.20, legDur:1.00, phase:3/6, full:true },
+  { name:'fairy', bodyAnim:'body-fairy',  legAnim:'legs-fairy',  bodyDur:4.20, legDur:2.10, phase:4/6, full:true },
+  { name:'trees', bodyAnim:'body-spin',   legAnim:'legs-still',  bodyDur:5.00, legDur:1.00, phase:5/6, full:true },
+];
+
+const stage = document.getElementById('stage');
+const btn   = document.getElementById('dance-btn');
+
+let dancing = false;
+let items = [];   // {orbit, flip, phase}
+
+// 現在の周回位置(％)を取得（取れなければ phase を使う）
+function currentPct(el, fallback){
+  try{
+    const d = getComputedStyle(el).offsetDistance;
+    if(d && d.endsWith('%')) return parseFloat(d);
+  }catch(e){}
+  return fallback;
+}
+
+function applyMode(){
+  btn.textContent = dancing ? 'stop ■' : 'dance ♪';
+  btn.classList.toggle('on', dancing);
+
+  items.forEach(it=>{
+    const pct = currentPct(it.orbit, it.phase * 100);
+    if(dancing){
+      // 今の位置から滑らかに周回開始（負の遅延で位相合わせ）
+      const delay = (pct / 100) * ORBIT_DUR;
+      it.orbit.style.animation = `orbit ${ORBIT_DUR}s linear -${delay.toFixed(2)}s infinite`;
+    }else{
+      // 今の位置で停止（その場でふわふわ）
+      it.orbit.style.animation = 'none';
+      it.orbit.style.offsetDistance = pct.toFixed(2) + '%';
+      it.flip.style.transform = 'scaleX(1)';
+    }
+  });
+}
+
+function build() {
+  items.forEach(it => it.orbit.remove());
+  items = [];
+
+  const cx = window.innerWidth  / 2;
+  const cy = window.innerHeight / 2;
+  const rx = Math.min(window.innerWidth  * 0.32, 320);
+  const ry = Math.min(window.innerHeight * 0.28, 230);
+  const totalH = DISP_BH + DISP_LH;
+
+  CHARS.forEach((c, i) => {
+    const charH = c.full ? FULL_H : totalH;
+
+    // 軌道ラッパー（停止中は phase 位置に駐機）
+    const orbit = document.createElement('div');
+    orbit.className = 'char-orbit';
+    orbit.style.cssText = `
+      width:${DISP_W}px; height:${charH}px;
+      left:${cx - DISP_W/2}px; top:${cy - charH/2}px;
+      offset-path: ellipse(${rx}px ${ry}px at 50% 50%);
+      offset-rotate: 0deg;
+      offset-distance: ${(c.phase*100).toFixed(2)}%;
+    `;
+
+    // ふわふわ浮遊レイヤー（常時・キャラごとに少しずらす）
+    const bob = document.createElement('div');
+    bob.className = 'char-bob';
+    bob.style.animation = `float-bob ${(3.4 + i*0.4).toFixed(1)}s ease-in-out ${(i*0.5).toFixed(1)}s infinite`;
+
+    // 向きレイヤー
+    const flip = document.createElement('div');
+    flip.className = 'char-flip';
+
+    // 揺れレイヤー
+    const bodyWrap = document.createElement('div');
+    bodyWrap.className = 'char-body-wrap';
+
+    if (c.full) {
+      const anim = c.name === 'fairy' ? 'fairy-full' : c.bodyAnim;
+      const dur  = c.name === 'fairy' ? ORBIT_DUR / 2 : c.bodyDur;
+      bodyWrap.style.animation = `${anim} ${dur}s ease-in-out 0s infinite`;
+
+      const full = document.createElement('div');
+      full.style.cssText = `
+        width:${DISP_W}px; height:${FULL_H}px;
+        background-image:url('char_${c.name}.png');
+        background-size:${DISP_W}px ${FULL_H}px;
+        background-repeat:no-repeat; transform-origin:center center;
+      `;
+      bodyWrap.appendChild(full);
+
+    } else {
+      bodyWrap.style.animation = `${c.bodyAnim} ${c.bodyDur}s ease-in-out 0s infinite`;
+
+      const body = document.createElement('div');
+      body.className = 'c-body';
+      body.style.cssText = `
+        width:${DISP_W}px; height:${DISP_BH}px;
+        background-image:url('char_${c.name}_body.png');
+        background-size:${DISP_W}px ${DISP_BH}px; background-repeat:no-repeat;
+      `;
+      const legs = document.createElement('div');
+      legs.className = 'c-legs';
+      legs.style.cssText = `
+        width:${DISP_W}px; height:${DISP_LH}px;
+        background-image:url('char_${c.name}_legs.png');
+        background-size:${DISP_W}px ${DISP_LH}px; background-repeat:no-repeat;
+        animation:${c.legAnim} ${c.legDur}s ease-in-out 0s infinite;
+        transform-origin:center top;
+      `;
+      bodyWrap.appendChild(body);
+      bodyWrap.appendChild(legs);
+    }
+
+    flip.appendChild(bodyWrap);
+    bob.appendChild(flip);
+    orbit.appendChild(bob);
+    stage.appendChild(orbit);
+
+    items.push({ orbit, flip, phase: c.phase });
+
+    // 進行方向で左右反転（dance中のみ作動）
+    (function loop() {
+      if (dancing) {
+        const rect = orbit.getBoundingClientRect();
+        const charCx = rect.left + rect.width / 2;
+        flip.style.transform = (charCx < cx) ? 'scaleX(-1)' : 'scaleX(1)';
+      }
+      requestAnimationFrame(loop);
+    })();
+  });
+
+  applyMode();
+}
+
+btn.addEventListener('click', () => {
+  dancing = !dancing;
+  applyMode();
+});
+
+build();
+window.addEventListener('resize', build);
+</script>
+</body>
+</html>
