@@ -12,6 +12,8 @@
     --btn-dk: #5c8a24;
     --breeze:    #5ab4d6;
     --breeze-dk: #3a94b6;
+    --sun:       #f0ab3d;
+    --sun-dk:    #d68e1f;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -124,6 +126,27 @@
   #breeze-btn:hover{ background: var(--breeze-dk); box-shadow: 0 8px 20px rgba(58,148,182,0.45), inset 0 1px 0 rgba(255,255,255,0.35); }
   #breeze-btn:active{ transform: scale(0.96); }
   #breeze-btn:disabled{ opacity: 0.55; cursor: default; transform: none; }
+  #photo-btn{
+    background: var(--sun);
+    box-shadow: 0 6px 16px rgba(230,160,30,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  #photo-btn:hover{ background: var(--sun-dk); box-shadow: 0 8px 20px rgba(230,160,30,0.45), inset 0 1px 0 rgba(255,255,255,0.35); }
+  #photo-btn:active{ transform: scale(0.96); }
+  #photo-btn.on{ background: var(--sun-dk); }
+
+  /* ===== 風船破裂のドカン ===== */
+  @keyframes pop-burst{
+    0%   { transform: translate(-50%,-50%) scale(0.4); opacity:0; }
+    30%  { transform: translate(-50%,-50%) scale(1.3); opacity:1; }
+    100% { transform: translate(-50%,-50%) scale(2.2); opacity:0; }
+  }
+  .pop{
+    position: fixed;
+    z-index: 70;
+    font-size: 80px;
+    pointer-events: none;
+    animation: pop-burst 600ms ease-out forwards;
+  }
 
   /* ===== 風ライン ===== */
   @keyframes wind-streak {
@@ -272,6 +295,7 @@
 <div id="btn-group">
   <button id="dance-btn" type="button">dance ♪</button>
   <button id="breeze-btn" type="button">breeze 🌬</button>
+  <button id="photo-btn" type="button">光合成 ☀️</button>
 </div>
 
 <script>
@@ -511,6 +535,62 @@ breezeBtn.addEventListener('click', () => {
     breezing = false;
     breezeBtn.disabled = false;
   }, BLOW_DELAY + BREEZE_DUR + items.length * 70 + 100);
+});
+
+// ===== 光合成（どんどん大きく → もう一度押すと戻る / 放置で破裂） =====
+const photoBtn  = document.getElementById('photo-btn');
+let   photoOn   = false;
+let   photoTimer= null;
+const GROW_TIME = 5000;   // 大きくなりきって破裂するまで(ms)
+const MAX_SCALE = 3;      // 最大の大きさ
+
+function setCharScale(scale, dur, ease){
+  items.forEach(it=>{
+    it.orbit.style.transformOrigin = 'center center';
+    it.orbit.style.transition = `transform ${dur}ms ${ease}`;
+    it.orbit.style.transform  = `scale(${scale})`;
+  });
+}
+
+// 風船のように破裂 → 元の画面に戻す
+function photoBurst(){
+  items.forEach(it=>{
+    const r = it.orbit.getBoundingClientRect();
+    // ドカンと一瞬膨らんで消える
+    it.orbit.style.transition = 'transform 130ms ease-in, opacity 220ms ease-out 130ms';
+    it.orbit.style.transform  = `scale(${MAX_SCALE + 1})`;
+    it.orbit.style.opacity    = '0';
+    // 💥 を表示
+    const pop = document.createElement('div');
+    pop.className = 'pop';
+    pop.textContent = '💥';
+    pop.style.cssText = `left:${r.left + r.width/2}px; top:${r.top + r.height/2}px;`;
+    document.body.appendChild(pop);
+    setTimeout(() => pop.remove(), 650);
+  });
+  // 破裂後に元の画面（通常サイズ）へリセット
+  setTimeout(() => {
+    photoOn = false;
+    photoBtn.classList.remove('on');
+    build();
+  }, 520);
+}
+
+photoBtn.addEventListener('click', () => {
+  if (!photoOn){
+    // ① どんどん大きくなる
+    photoOn = true;
+    photoBtn.classList.add('on');
+    setCharScale(MAX_SCALE, GROW_TIME, 'linear');
+    // ③ もう一度押さなければ破裂
+    photoTimer = setTimeout(photoBurst, GROW_TIME);
+  } else {
+    // ② もう一度押したら通常サイズに戻す
+    clearTimeout(photoTimer);
+    photoOn = false;
+    photoBtn.classList.remove('on');
+    setCharScale(1, 700, 'ease');
+  }
 });
 
 build();
