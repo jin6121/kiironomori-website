@@ -148,11 +148,9 @@
     6%   { transform: translate(18px,-8px)        rotate(35deg);  opacity:1; }
     45%  { transform: translate(125vw,-55vh)      rotate(540deg); opacity:1; }
     46%  { transform: translate(125vw,-55vh)      rotate(540deg); opacity:0; }
-    47%  { transform: translate(-120vw,-22vh)     rotate(-180deg);opacity:0; }
-    58%  { transform: translate(-120vw,-22vh)     rotate(-180deg);opacity:0; }
-    60%  { transform: translate(-100vw,8px)       rotate(-150deg);opacity:1; }
-    88%  { transform: translate(14px,-6px)        rotate(-12deg); opacity:1; }
-    95%  { transform: translate(-5px,0)           rotate(4deg);   opacity:1; }
+    /* 飛んでいったら、元の位置でそのままフェードインして戻る */
+    47%  { transform: translate(0,0)              rotate(0deg);   opacity:0; }
+    68%  { transform: translate(0,0)              rotate(0deg);   opacity:0; }
     100% { transform: translate(0,0)              rotate(0deg);   opacity:1; }
   }
 
