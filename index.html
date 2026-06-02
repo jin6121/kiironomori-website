@@ -145,14 +145,14 @@
   /* ===== breezeアニメ（bobレイヤーに適用）：くるりと回転しながら斜め上へ宙返り ===== */
   @keyframes char-breeze {
     0%   { transform: translate(0,0)              rotate(0deg);   opacity:1; }
-    8%   { transform: translate(18px,-8px)        rotate(35deg);  opacity:1; }
-    34%  { transform: translate(150vw,-65vh)      rotate(540deg); opacity:1; }
-    35%  { transform: translate(150vw,-65vh)      rotate(540deg); opacity:0; }
-    36%  { transform: translate(-130vw,-25vh)     rotate(-180deg);opacity:0; }
-    54%  { transform: translate(-130vw,-25vh)     rotate(-180deg);opacity:0; }
-    56%  { transform: translate(-100vw,8px)       rotate(-150deg);opacity:1; }
-    80%  { transform: translate(14px,-6px)        rotate(-12deg); opacity:1; }
-    92%  { transform: translate(-5px,0)           rotate(4deg);   opacity:1; }
+    6%   { transform: translate(18px,-8px)        rotate(35deg);  opacity:1; }
+    45%  { transform: translate(125vw,-55vh)      rotate(540deg); opacity:1; }
+    46%  { transform: translate(125vw,-55vh)      rotate(540deg); opacity:0; }
+    47%  { transform: translate(-120vw,-22vh)     rotate(-180deg);opacity:0; }
+    58%  { transform: translate(-120vw,-22vh)     rotate(-180deg);opacity:0; }
+    60%  { transform: translate(-100vw,8px)       rotate(-150deg);opacity:1; }
+    88%  { transform: translate(14px,-6px)        rotate(-12deg); opacity:1; }
+    95%  { transform: translate(-5px,0)           rotate(4deg);   opacity:1; }
     100% { transform: translate(0,0)              rotate(0deg);   opacity:1; }
   }
 
@@ -438,7 +438,7 @@ const windBlower = document.getElementById('wind-blower');
 
 // 雲が登場してから他のキャラを吹き飛ばすまでの間（ms）
 const BLOW_DELAY  = 750;
-const BREEZE_DUR  = 2700;
+const BREEZE_DUR  = 5200;   // 0→45%（飛び去る部分）が約2.3秒＝葉っぱと同じ速さ
 const LEAF_EMOJI  = ['🍃','🍂','🍁'];
 
 // 葉っぱを1枚、雲の口元あたりから右へ舞わせる
@@ -499,7 +499,7 @@ breezeBtn.addEventListener('click', () => {
     items.forEach((it, i) => {
       const stagger = i * 70;
       setTimeout(() => {
-        it.bob.style.animation = `char-breeze ${BREEZE_DUR}ms ease-in-out forwards`;
+        it.bob.style.animation = `char-breeze ${BREEZE_DUR}ms linear forwards`;
       }, stagger);
       // 終了後に元のふわふわアニメに戻す
       setTimeout(() => {
