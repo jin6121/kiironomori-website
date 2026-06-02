@@ -277,6 +277,63 @@
   @media (prefers-reduced-motion: reduce){
     .char-bob, .char-body-wrap, .c-legs { animation: none !important; }
   }
+
+  /* ===== キャラ名ポップアップ ===== */
+  #char-popup {
+    position: fixed;
+    z-index: 80;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  #char-popup.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  #char-popup-inner {
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(127,174,58,0.35);
+    border-radius: 18px;
+    padding: 18px 22px 16px;
+    box-shadow: 0 8px 32px rgba(60,90,30,0.18), 0 2px 8px rgba(60,90,30,0.10);
+    max-width: 280px;
+    min-width: 180px;
+    position: relative;
+  }
+  #char-popup-name {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--ink);
+    letter-spacing: 0.18em;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  #char-popup-desc {
+    font-size: 12px;
+    color: var(--ink-sub);
+    line-height: 1.8;
+    letter-spacing: 0.08em;
+    text-align: left;
+  }
+  #char-popup-close {
+    position: absolute;
+    top: 8px; right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--ink-sub);
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 50%;
+    transition: background 0.15s;
+  }
+  #char-popup-close:hover { background: rgba(0,0,0,0.08); }
+  .char-clickable { cursor: pointer; }
 </style>
 </head>
 <body>
@@ -291,6 +348,14 @@
 
 
 <img id="wind-blower" src="char_wind.png" alt="">
+
+<div id="char-popup">
+  <div id="char-popup-inner">
+    <button id="char-popup-close" type="button">✕</button>
+    <div id="char-popup-name"></div>
+    <div id="char-popup-desc"></div>
+  </div>
+</div>
 
 <div id="btn-group">
   <button id="dance-btn" type="button">dance ♪</button>
@@ -314,7 +379,10 @@ const CHARS = [
   { name:'sun',   bodyAnim:'body-pulse',  legAnim:'legs-still',  bodyDur:2.00, legDur:1.00, phase:1/6 },
   { name:'stump', bodyAnim:'body-bounce', legAnim:'legs-bounce', bodyDur:1.80, legDur:1.80, phase:2/6, full:true },
   { name:'leaf',  bodyAnim:'body-sway',   legAnim:'legs-still',  bodyDur:3.20, legDur:1.00, phase:3/6, full:true },
-  { name:'fairy', bodyAnim:'body-fairy',  legAnim:'legs-fairy',  bodyDur:4.20, legDur:2.10, phase:4/6, full:true },
+  { name:'fairy', bodyAnim:'body-fairy',  legAnim:'legs-fairy',  bodyDur:4.20, legDur:2.10, phase:4/6, full:true,
+    label:'ティラス',
+    desc:'パワースポットの聖なるエネルギーが滴り落ちた「光の雫」から生まれた妖精。\n自然が編み上げた「光のティアラ」を頭に戴き、ノッティや仲間たちの行く先を温かく照らします。\n頭の勾玉には特別な秘密が隠されているとか…✨'
+  },
   { name:'trees', bodyAnim:'body-spin',   legAnim:'legs-still',  bodyDur:5.00, legDur:1.00, phase:5/6, full:true },
 ];
 
@@ -434,6 +502,15 @@ function build() {
     stage.appendChild(orbit);
 
     items.push({ orbit, flip, bob, bobAnim, phase: c.phase });
+
+    // クリックでキャラ名を表示
+    if (c.label) {
+      orbit.classList.add('char-clickable');
+      orbit.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showCharPopup(c, orbit);
+      });
+    }
 
     // 進行方向で左右反転（dance中のみ作動）
     (function loop() {
@@ -592,6 +669,45 @@ photoBtn.addEventListener('click', () => {
     setCharScale(1, 700, 'ease');
   }
 });
+
+// ===== キャラ名ポップアップ =====
+const popup      = document.getElementById('char-popup');
+const popupName  = document.getElementById('char-popup-name');
+const popupDesc  = document.getElementById('char-popup-desc');
+const popupClose = document.getElementById('char-popup-close');
+
+function showCharPopup(charDef, orbitEl) {
+  const rect = orbitEl.getBoundingClientRect();
+  popupName.textContent = charDef.label;
+  popupDesc.innerHTML = charDef.desc.replace(/\n/g, '<br>');
+
+  // ポップアップの位置：キャラの上に表示、画面端を考慮
+  popup.style.left = '0';
+  popup.style.top  = '0';
+  popup.classList.add('visible');
+
+  const pw = popup.offsetWidth;
+  const ph = popup.offsetHeight;
+  let x = rect.left + rect.width / 2 - pw / 2;
+  let y = rect.top - ph - 12;
+
+  // 画面下に収まらない場合はキャラの下に出す
+  if (y < 8) y = rect.bottom + 12;
+  // 画面端のはみ出し補正
+  x = Math.max(8, Math.min(x, window.innerWidth - pw - 8));
+  y = Math.max(8, Math.min(y, window.innerHeight - ph - 8));
+
+  popup.style.left = x + 'px';
+  popup.style.top  = y + 'px';
+}
+
+function hideCharPopup() {
+  popup.classList.remove('visible');
+}
+
+popupClose.addEventListener('click', (e) => { e.stopPropagation(); hideCharPopup(); });
+document.addEventListener('click', hideCharPopup);
+popup.addEventListener('click', (e) => e.stopPropagation());
 
 build();
 window.addEventListener('resize', build);
