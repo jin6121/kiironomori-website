@@ -134,18 +134,33 @@
   #photo-btn:active{ transform: scale(0.96); }
   #photo-btn.on{ background: var(--sun-dk); }
 
-  /* ===== 風船破裂のドカン ===== */
-  @keyframes pop-burst{
-    0%   { transform: translate(-50%,-50%) scale(0.4); opacity:0; }
-    30%  { transform: translate(-50%,-50%) scale(1.3); opacity:1; }
-    100% { transform: translate(-50%,-50%) scale(2.2); opacity:0; }
+  /* ===== 神秘的な消滅：葉っぱ・花びらが舞い、シャボン玉のように透けて消える ===== */
+  /* 舞い散る葉っぱ・花びら */
+  @keyframes petal-drift{
+    0%   { transform: translate(0,0) rotate(0deg) scale(0.5); opacity:0; }
+    15%  { opacity:1; }
+    100% { transform: translate(var(--px), var(--py)) rotate(var(--pr)) scale(1); opacity:0; }
   }
-  .pop{
+  .petal{
     position: fixed;
-    z-index: 70;
-    font-size: 80px;
+    z-index: 65;
     pointer-events: none;
-    animation: pop-burst 600ms ease-out forwards;
+    will-change: transform, opacity;
+    animation: petal-drift var(--pd) ease-out forwards;
+  }
+  /* きらめき */
+  @keyframes sparkle-twinkle{
+    0%   { transform: translate(-50%,-50%) scale(0)   rotate(0deg);   opacity:0; }
+    40%  { transform: translate(-50%,-50%) scale(1.2) rotate(40deg);  opacity:1; }
+    100% { transform: translate(-50%,-50%) scale(0.2) rotate(90deg);  opacity:0; }
+  }
+  .sparkle{
+    position: fixed;
+    z-index: 66;
+    font-size: 22px;
+    pointer-events: none;
+    will-change: transform, opacity;
+    animation: sparkle-twinkle var(--sd) ease-in-out forwards;
   }
 
   /* ===== 風ライン ===== */
@@ -552,28 +567,58 @@ function setCharScale(scale, dur, ease){
   });
 }
 
-// 風船のように破裂 → 元の画面に戻す
+const PETALS   = ['🍃','🌸','🌿','🍂','🌺'];
+const SPARKLES = ['✨','🌟','⭐️','💫'];
+
+// 葉っぱ・花びらを1枚、中心(cx,cy)から舞い散らせる
+function spawnPetal(cx, cy){
+  const p = document.createElement('div');
+  p.className = 'petal';
+  p.textContent = PETALS[Math.floor(Math.random()*PETALS.length)];
+  const px = ((Math.random()-0.5) * 360) + 'px';            // 横に広がる
+  const py = (60 + Math.random()*220) + 'px';               // ふわっと下へ
+  const pr = ((Math.random()<0.5?-1:1) * (180+Math.random()*360)) + 'deg';
+  const pd = (1.8 + Math.random()*1.6) + 's';               // ゆっくり
+  p.style.cssText =
+    `left:${cx}px; top:${cy}px; font-size:${20+Math.random()*20}px;` +
+    `--px:${px}; --py:${py}; --pr:${pr}; --pd:${pd};`;
+  document.body.appendChild(p);
+  setTimeout(() => p.remove(), 3600);
+}
+
+// きらめきを1つ
+function spawnSparkle(cx, cy){
+  const s = document.createElement('div');
+  s.className = 'sparkle';
+  s.textContent = SPARKLES[Math.floor(Math.random()*SPARKLES.length)];
+  const ox = cx + (Math.random()-0.5)*120;
+  const oy = cy + (Math.random()-0.5)*120;
+  s.style.cssText = `left:${ox}px; top:${oy}px; font-size:${16+Math.random()*16}px; --sd:${(0.8+Math.random()*0.9)}s;`;
+  document.body.appendChild(s);
+  setTimeout(() => s.remove(), 1900);
+}
+
+// 神秘的に消える：シャボン玉のように透けて消えつつ、葉・花びら・きらめきが舞う
 function photoBurst(){
   items.forEach(it=>{
-    const r = it.orbit.getBoundingClientRect();
-    // ドカンと一瞬膨らんで消える
-    it.orbit.style.transition = 'transform 130ms ease-in, opacity 220ms ease-out 130ms';
-    it.orbit.style.transform  = `scale(${MAX_SCALE + 1})`;
-    it.orbit.style.opacity    = '0';
-    // 💥 を表示
-    const pop = document.createElement('div');
-    pop.className = 'pop';
-    pop.textContent = '💥';
-    pop.style.cssText = `left:${r.left + r.width/2}px; top:${r.top + r.height/2}px;`;
-    document.body.appendChild(pop);
-    setTimeout(() => pop.remove(), 650);
+    const r  = it.orbit.getBoundingClientRect();
+    const cx = r.left + r.width/2;
+    const cy = r.top  + r.height/2;
+    // シャボン玉のように、ふわっと膨らんで光りながら透けて消える
+    it.orbit.style.transition = 'transform 800ms ease-out, opacity 800ms ease-out, filter 800ms ease-out';
+    it.orbit.style.transform  = `scale(${MAX_SCALE * 1.12})`;
+    it.orbit.style.opacity     = '0';
+    it.orbit.style.filter      = 'blur(4px) brightness(1.5)';
+    // 葉っぱ・花びら・きらめきを舞わせる
+    for (let i=0;i<10;i++) spawnPetal(cx, cy);
+    for (let i=0;i<8; i++) spawnSparkle(cx, cy);
   });
-  // 破裂後に元の画面（通常サイズ）へリセット
+  // 消えたあと、元の画面（通常サイズ）へそっと戻す（舞い散る葉はそのまま余韻を残す）
   setTimeout(() => {
     photoOn = false;
     photoBtn.classList.remove('on');
     build();
-  }, 520);
+  }, 850);
 }
 
 photoBtn.addEventListener('click', () => {
