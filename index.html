@@ -850,15 +850,17 @@ function spawnRainDrop() {
 
   const size = 18 + Math.random() * 22;
   const x = Math.random() * (window.innerWidth - size);
-  const dur = (2.2 + Math.random() * 2.4).toFixed(2);
+  const dur = 2.2 + Math.random() * 2.4;
   const rot = ((Math.random() - 0.5) * 20).toFixed(1);
+  // 負のディレイで落下途中からスタート → 横一列を防ぐ
+  const negDelay = -(Math.random() * dur).toFixed(2);
 
   img.style.cssText =
     `left:${x}px; top:0; width:${size}px; height:auto;` +
-    `--rd:${dur}s; --rr:${rot}deg;`;
+    `--rd:${dur.toFixed(2)}s; --rr:${rot}deg;` +
+    `animation-delay:${negDelay}s;`;
 
   document.body.appendChild(img);
-  // 落下完了後に自動削除
   img.addEventListener('animationend', () => img.remove());
 }
 
