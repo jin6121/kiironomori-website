@@ -388,14 +388,14 @@ const DISP_W  = 150;
 const SCALE   = DISP_W / 938;
 const DISP_BH = Math.round(476 * SCALE);
 const DISP_LH = Math.round(292 * SCALE);
-const FULL_H  = Math.round(768 * SCALE);
+const FULL_H  = DISP_W;  // 新しい画像は 2000×2000 の正方形
 
 const ORBIT_DUR = 40;   // 回転モードの一周（秒）
 
 // キャラ定義
 const CHARS = [
-  { name:'fruit', bodyAnim:'body-flap',   legAnim:'legs-still',  bodyDur:0.85, legDur:1.00, phase:0/6 },
-  { name:'sun',   bodyAnim:'body-pulse',  legAnim:'legs-still',  bodyDur:2.00, legDur:1.00, phase:1/6 },
+  { name:'fruit', bodyAnim:'body-flap',   legAnim:'legs-still',  bodyDur:0.85, legDur:1.00, phase:0/6, full:true },
+  { name:'sun',   bodyAnim:'body-pulse',  legAnim:'legs-still',  bodyDur:2.00, legDur:1.00, phase:1/6, full:true },
   { name:'stump', bodyAnim:'body-bounce', legAnim:'legs-bounce', bodyDur:1.80, legDur:1.80, phase:2/6, full:true },
   { name:'leaf',  bodyAnim:'body-sway',   legAnim:'legs-still',  bodyDur:3.20, legDur:1.00, phase:3/6, full:true },
   { name:'fairy', bodyAnim:'body-fairy',  legAnim:'legs-fairy',  bodyDur:4.20, legDur:2.10, phase:4/6, full:true,
