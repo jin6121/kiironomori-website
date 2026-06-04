@@ -839,12 +839,8 @@ function startRain() {
 
 function scheduleSpawn() {
   if (!raining) return;
-  // ランダムな個数・ランダムな開始Y（画面上方に分散）で補充
-  if (drops.length < 45) {
-    drops.push(createDrop(-(40 + Math.random() * 500)));
-  }
-  // 次の補充までの間隔もランダム化（一定リズムによる横帯化を防ぐ）
-  rainInterval = setTimeout(scheduleSpawn, 80 + Math.random() * 160);
+  drops.push(createDrop(-40));
+  rainInterval = setTimeout(scheduleSpawn, 100 + Math.random() * 200);
 }
 
 function createDrop(startY) {
