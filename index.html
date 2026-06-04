@@ -230,7 +230,6 @@
   .leaf{
     position: fixed;
     z-index: 55;
-    font-size: 26px;
     pointer-events: none;
     will-change: transform, opacity;
     animation: leaf-fly linear forwards;
@@ -557,13 +556,12 @@ const windBlower = document.getElementById('wind-blower');
 // 雲が登場してから他のキャラを吹き飛ばすまでの間（ms）
 const BLOW_DELAY  = 750;
 const BREEZE_DUR  = 5200;   // 0→45%（飛び去る部分）が約2.3秒＝葉っぱと同じ速さ
-const LEAF_EMOJI  = ['🍃','🍂','🍁'];
 
 // 葉っぱを1枚、雲の口元あたりから右へ舞わせる
 function spawnLeaf(){
-  const leaf = document.createElement('div');
+  const leaf = document.createElement('img');
+  leaf.src = 'leaf_particle.png';
   leaf.className = 'leaf';
-  leaf.textContent = LEAF_EMOJI[Math.floor(Math.random()*LEAF_EMOJI.length)];
 
   // 出発点：画面左寄り（雲の口元付近）の高さ
   const startX = 90 + Math.random()*180;
@@ -574,9 +572,10 @@ function spawnLeaf(){
   const lr = (360 + Math.random()*540) * (Math.random()<0.5?-1:1) + 'deg';
   const dur = 1.6 + Math.random()*1.4;
   const delay = Math.random()*0.9;
+  const size = Math.round(24 + Math.random()*20);
 
   leaf.style.cssText =
-    `left:${startX}px; top:${startY}px; font-size:${18+Math.random()*16}px;` +
+    `left:${startX}px; top:${startY}px; width:${size}px; height:${size}px;` +
     `--lx:${lx}; --ly:${ly}; --lr:${lr};` +
     `animation-duration:${dur}s; animation-delay:${delay}s;`;
   document.body.appendChild(leaf);
