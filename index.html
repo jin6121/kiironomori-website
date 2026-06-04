@@ -393,18 +393,12 @@
   }
 
   /* ===== 雨粒 ===== */
-  @keyframes rain-fall {
-    0%   { transform: translateY(-120px) rotate(var(--rr)); opacity: 0; }
-    10%  { opacity: 1; }
-    90%  { opacity: 0.85; }
-    100% { transform: translateY(calc(100vh + 120px)) rotate(var(--rr)); opacity: 0; }
-  }
   .rain-drop {
     position: fixed;
     z-index: 68;
     pointer-events: none;
     will-change: transform, opacity;
-    animation: rain-fall var(--rd) linear 0s forwards;
+    opacity: 0.88;
   }
 </style>
 </head>
@@ -829,6 +823,10 @@ let raining = false;
 let rainInterval = null;
 let rainCharTimer = null;
 
+// 雨粒データ（JS制御）
+let drops = [];
+let rafId = null;
+
 function startRain() {
   raining = true;
   rainBtn.disabled = true;
@@ -837,50 +835,67 @@ function startRain() {
   void rainChar.offsetWidth;
   rainChar.classList.add('rain-enter');
 
-  // 一定間隔で1粒ずつスポーン（同時スタートなし）
-  rainInterval = setInterval(spawnRainDrop, 180);
+  // 最初から画面全体にランダム配置（上端スタートなし）
+  const vh = window.innerHeight;
+  for (let i = 0; i < 35; i++) {
+    drops.push(createDrop(Math.random() * vh));  // 画面内のランダムY位置
+  }
+  rainInterval = setInterval(() => {
+    if (drops.length < 40) drops.push(createDrop(-40));  // 新粒は画面上からのみ
+  }, 220);
 
+  rafId = requestAnimationFrame(tickRain);
   rainCharTimer = setTimeout(stopRain, 8000);
 }
 
-function spawnRainDrop() {
+function createDrop(startY) {
   const img = document.createElement('img');
   img.src = RAIN_IMGS[Math.floor(Math.random() * RAIN_IMGS.length)];
   img.className = 'rain-drop';
-
   const size = 18 + Math.random() * 22;
-  const x = Math.random() * (window.innerWidth - size);
-  const dur = 2.2 + Math.random() * 2.4;
-  const rot = ((Math.random() - 0.5) * 20).toFixed(1);
-  // 負のディレイで落下途中からスタート → 横一列を防ぐ
-  const negDelay = -(Math.random() * dur).toFixed(2);
-
-  img.style.cssText =
-    `left:${x}px; top:0; width:${size}px; height:auto;` +
-    `--rd:${dur.toFixed(2)}s; --rr:${rot}deg;` +
-    `animation-delay:${negDelay}s;`;
-
+  img.style.cssText = `width:${size}px; height:auto; position:fixed; pointer-events:none; z-index:68;`;
   document.body.appendChild(img);
-  img.addEventListener('animationend', () => img.remove());
+  return {
+    el: img,
+    x: Math.random() * (window.innerWidth - size),
+    y: startY,
+    speed: 1.4 + Math.random() * 1.2,
+    size,
+    rot: (Math.random() - 0.5) * 20,
+  };
+}
+
+function tickRain() {
+  const vh = window.innerHeight;
+  for (let i = drops.length - 1; i >= 0; i--) {
+    const d = drops[i];
+    d.y += d.speed;
+    d.el.style.left = d.x + 'px';
+    d.el.style.top  = d.y + 'px';
+    d.el.style.transform = `rotate(${d.rot}deg)`;
+    if (d.y > vh + 60) {
+      d.el.remove();
+      drops.splice(i, 1);
+    }
+  }
+  if (raining || drops.length > 0) rafId = requestAnimationFrame(tickRain);
 }
 
 function stopRain() {
   clearTimeout(rainCharTimer);
   clearInterval(rainInterval);
   rainInterval = null;
+  raining = false;
 
   rainChar.classList.remove('rain-enter');
   void rainChar.offsetWidth;
   rainChar.classList.add('rain-exit');
 
-  // 既存の粒はそのまま落下完了まで待つ（animationendで自動削除）
-
+  // 残りの粒は自然に落ち切るまで待つ（tickRainが継続）
   setTimeout(() => {
-    raining = false;
     rainBtn.disabled = false;
     rainChar.classList.remove('rain-exit');
   }, 900);
-
 }
 
 rainBtn.addEventListener('click', () => {
