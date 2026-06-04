@@ -820,7 +820,11 @@ window.addEventListener('resize', build);
 // ===== 恵の雨 =====
 const rainBtn  = document.getElementById('rain-btn');
 const rainChar = document.getElementById('rain-character');
-const RAIN_IMGS = ['rain_drop_10.png'];
+const RAIN_IMGS = [
+  'raindrop_1.png','raindrop_2.png','raindrop_3.png','raindrop_4.png',
+  'raindrop_5.png','raindrop_6.png','raindrop_7.png','raindrop_8.png',
+  'raindrop_9.png','raindrop_10.png','raindrop_11.png','raindrop_12.png'
+];
 const RAIN_DROP_COUNT = 28;
 let raining = false;
 let rainDrops = [];
@@ -837,7 +841,7 @@ function startRain() {
 
   // 雨粒を生成
   for (let i = 0; i < RAIN_DROP_COUNT; i++) {
-    spawnRainDrop(i * (3000 / RAIN_DROP_COUNT));
+    spawnRainDrop(Math.random() * 3000);
   }
 
   // 8秒後に終了
