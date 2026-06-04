@@ -830,12 +830,21 @@ function startRain() {
   for (let i = 0; i < 35; i++) {
     drops.push(createDrop(Math.random() * vh));
   }
-  rainInterval = setInterval(() => {
-    if (drops.length < 40) drops.push(createDrop(-40));
-  }, 220);
+  // 補充も開始Y位置を画面上に大きくばらけさせ、横帯にならないようにする
+  scheduleSpawn();
 
   rafId = requestAnimationFrame(tickRain);
   rainCharTimer = setTimeout(stopRain, 8000);
+}
+
+function scheduleSpawn() {
+  if (!raining) return;
+  // ランダムな個数・ランダムな開始Y（画面上方に分散）で補充
+  if (drops.length < 45) {
+    drops.push(createDrop(-(40 + Math.random() * 500)));
+  }
+  // 次の補充までの間隔もランダム化（一定リズムによる横帯化を防ぐ）
+  rainInterval = setTimeout(scheduleSpawn, 80 + Math.random() * 160);
 }
 
 function createDrop(startY) {
@@ -872,7 +881,7 @@ function tickRain() {
 
 function stopRain() {
   clearTimeout(rainCharTimer);
-  clearInterval(rainInterval);
+  clearTimeout(rainInterval);
   rainInterval = null;
   raining = false;
 
