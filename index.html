@@ -823,7 +823,7 @@ const rainChar = document.getElementById('rain-character');
 const RAIN_IMGS = [
   'raindrop_1.png','raindrop_2.png','raindrop_3.png','raindrop_4.png',
   'raindrop_5.png','raindrop_6.png','raindrop_7.png','raindrop_8.png',
-  'raindrop_9.png','raindrop_10.png','raindrop_11.png','raindrop_12.png'
+  'raindrop_9.png','raindrop_10.png','raindrop_11.png'
 ];
 const RAIN_DROP_COUNT = 28;
 let raining = false;
@@ -854,11 +854,11 @@ function spawnRainDrop(startDelay) {
   img.src = src;
   img.className = 'rain-drop';
 
-  const size = 48 + Math.random() * 64;
+  const size = 18 + Math.random() * 22;   // 18〜40px（小さく細かく）
   const x = Math.random() * (window.innerWidth - size);
-  const dur = (1.6 + Math.random() * 1.8).toFixed(2);
-  const delay = (startDelay / 1000 + Math.random() * 1.5).toFixed(2);
-  const rot = ((Math.random() - 0.5) * 40).toFixed(1);
+  const dur = (2.2 + Math.random() * 2.4).toFixed(2);  // ゆっくり落下
+  const delay = (startDelay / 1000 + Math.random() * 2.0).toFixed(2);
+  const rot = ((Math.random() - 0.5) * 20).toFixed(1);  // 少し回転
 
   img.style.cssText =
     `left:${x}px; top:0; width:${size}px; height:auto;` +
