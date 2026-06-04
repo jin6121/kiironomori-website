@@ -362,6 +362,7 @@
   }
   #rain-btn:hover{ background: var(--rain-dk); box-shadow: 0 8px 20px rgba(44,109,181,0.45), inset 0 1px 0 rgba(255,255,255,0.35); }
   #rain-btn:active{ transform: scale(0.96); }
+  #rain-btn:disabled{ opacity: 0.55; cursor: default; transform: none; }
 
   /* ===== 恵みの雨キャラクター ===== */
   #rain-character {
@@ -391,6 +392,20 @@
     100% { transform: translateX(-50%) translateY(-110%); }
   }
 
+  /* ===== 雨粒 ===== */
+  @keyframes rain-fall {
+    0%   { transform: translateY(-120px) rotate(var(--rr)); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.85; }
+    100% { transform: translateY(calc(100vh + 120px)) rotate(var(--rr)); opacity: 0; }
+  }
+  .rain-drop {
+    position: fixed;
+    z-index: 68;
+    pointer-events: none;
+    will-change: transform, opacity;
+    animation: rain-fall var(--rd) linear var(--rdelay) infinite;
+  }
 </style>
 </head>
 <body>
@@ -817,7 +832,6 @@ let drops = [];
 function startRain() {
   raining = true;
   rainBtn.textContent = '恵の雨 ☔️ ON';
-  rainBtn.classList.add('active');
 
   rainChar.classList.remove('rain-exit');
   void rainChar.offsetWidth;
@@ -874,7 +888,6 @@ function stopRain() {
   clearTimeout(rainInterval);
   rainInterval = null;
   rainBtn.textContent = '恵の雨 ☔️';
-  rainBtn.classList.remove('active');
 
   rainChar.classList.remove('rain-enter');
   void rainChar.offsetWidth;
