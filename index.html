@@ -18,6 +18,8 @@
     --breeze-dk: #3a94b6;
     --sun:       #f0ab3d;
     --sun-dk:    #d68e1f;
+    --rain:      #4a90d9;
+    --rain-dk:   #2c6db5;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -352,6 +354,58 @@
   }
   #char-popup-close:hover { background: rgba(0,0,0,0.08); }
   .char-clickable { cursor: pointer; }
+
+  /* ===== 恵の雨ボタン ===== */
+  #rain-btn{
+    background: var(--rain);
+    box-shadow: 0 6px 16px rgba(44,109,181,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  #rain-btn:hover{ background: var(--rain-dk); box-shadow: 0 8px 20px rgba(44,109,181,0.45), inset 0 1px 0 rgba(255,255,255,0.35); }
+  #rain-btn:active{ transform: scale(0.96); }
+  #rain-btn:disabled{ opacity: 0.55; cursor: default; transform: none; }
+
+  /* ===== 恵みの雨キャラクター ===== */
+  #rain-character {
+    position: fixed;
+    z-index: 70;
+    pointer-events: none;
+    width: 220px;
+    height: auto;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-110%);
+    filter: drop-shadow(0 6px 18px rgba(44,109,181,0.35));
+    transition: none;
+  }
+  #rain-character.rain-enter {
+    animation: rain-char-enter 1.2s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  #rain-character.rain-exit {
+    animation: rain-char-exit 0.8s ease-in forwards;
+  }
+  @keyframes rain-char-enter {
+    0%   { transform: translateX(-50%) translateY(-110%); }
+    100% { transform: translateX(-50%) translateY(10px); }
+  }
+  @keyframes rain-char-exit {
+    0%   { transform: translateX(-50%) translateY(10px); }
+    100% { transform: translateX(-50%) translateY(-110%); }
+  }
+
+  /* ===== 雨粒 ===== */
+  @keyframes rain-fall {
+    0%   { transform: translateY(-120px) rotate(var(--rr)); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.85; }
+    100% { transform: translateY(calc(100vh + 120px)) rotate(var(--rr)); opacity: 0; }
+  }
+  .rain-drop {
+    position: fixed;
+    z-index: 68;
+    pointer-events: none;
+    will-change: transform, opacity;
+    animation: rain-fall var(--rd) linear var(--rdelay) infinite;
+  }
 </style>
 </head>
 <body>
@@ -366,6 +420,7 @@
 
 
 <img id="wind-blower" src="char_wind.png" alt="">
+<img id="rain-character" src="rain_char.png" alt="恵みの雨">
 
 <div id="char-popup">
   <div id="char-popup-inner">
@@ -379,6 +434,7 @@
   <button id="dance-btn" type="button">dance ♪</button>
   <button id="breeze-btn" type="button">breeze 🌬</button>
   <button id="photo-btn" type="button">光合成 ☀️</button>
+  <button id="rain-btn" type="button">恵の雨 ☔️</button>
 </div>
 
 <script>
@@ -760,6 +816,84 @@ popup.addEventListener('click', (e) => e.stopPropagation());
 
 build();
 window.addEventListener('resize', build);
+
+// ===== 恵の雨 =====
+const rainBtn  = document.getElementById('rain-btn');
+const rainChar = document.getElementById('rain-character');
+const RAIN_IMGS = [
+  'rain_drop_2.png','rain_drop_3.png','rain_drop_4.png','rain_drop_6.png',
+  'rain_drop_10.png','rain_drop_11.png','rain_drop_nottie.png',
+  'rain_drop_tirasu.png','rain_drop_sonokaze.png'
+];
+const RAIN_DROP_COUNT = 28;
+let raining = false;
+let rainDrops = [];
+let rainCharTimer = null;
+
+function startRain() {
+  raining = true;
+  rainBtn.disabled = true;
+
+  // キャラクターを上から登場
+  rainChar.classList.remove('rain-exit');
+  void rainChar.offsetWidth;
+  rainChar.classList.add('rain-enter');
+
+  // 雨粒を生成
+  for (let i = 0; i < RAIN_DROP_COUNT; i++) {
+    spawnRainDrop(i * (3000 / RAIN_DROP_COUNT));
+  }
+
+  // 8秒後に終了
+  rainCharTimer = setTimeout(stopRain, 8000);
+}
+
+function spawnRainDrop(startDelay) {
+  const img = document.createElement('img');
+  const src = RAIN_IMGS[Math.floor(Math.random() * RAIN_IMGS.length)];
+  img.src = src;
+  img.className = 'rain-drop';
+
+  const size = 48 + Math.random() * 64;
+  const x = Math.random() * (window.innerWidth - size);
+  const dur = (1.6 + Math.random() * 1.8).toFixed(2);
+  const delay = (startDelay / 1000 + Math.random() * 1.5).toFixed(2);
+  const rot = ((Math.random() - 0.5) * 40).toFixed(1);
+
+  img.style.cssText =
+    `left:${x}px; top:0; width:${size}px; height:auto;` +
+    `--rd:${dur}s; --rdelay:${delay}s; --rr:${rot}deg;`;
+
+  document.body.appendChild(img);
+  rainDrops.push(img);
+}
+
+function stopRain() {
+  clearTimeout(rainCharTimer);
+
+  // キャラクターを退場
+  rainChar.classList.remove('rain-enter');
+  void rainChar.offsetWidth;
+  rainChar.classList.add('rain-exit');
+
+  // 雨粒を削除
+  rainDrops.forEach(d => {
+    d.style.animationIterationCount = '1';
+    setTimeout(() => d.remove(), 3000);
+  });
+  rainDrops = [];
+
+  setTimeout(() => {
+    raining = false;
+    rainBtn.disabled = false;
+    rainChar.classList.remove('rain-exit');
+  }, 900);
+}
+
+rainBtn.addEventListener('click', () => {
+  if (raining) return;
+  startRain();
+});
 </script>
 </body>
 </html>
