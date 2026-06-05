@@ -40,6 +40,10 @@
     /* 後ろに退かせる：少し明るく・ほんのりぼかす（scaleは縁のにじみ防止） */
     filter: saturate(0.96) brightness(1.10) blur(2.5px);
     transform: scale(1.05);
+    transition: filter 1.5s ease, transform 1.5s ease;
+  }
+  #bg[data-stars='1'] {
+    transform: scale(1.0);
   }
   #bg::after {
     content: '';
@@ -907,6 +911,37 @@ function stopRain() {
 
 rainBtn.addEventListener('click', () => {
   raining ? stopRain() : startRain();
+});
+
+// ===== 星空 =====
+const starsBtn = document.getElementById('stars-btn');
+const bg = document.getElementById('bg');
+let starsActive = false;
+
+function startStars() {
+  starsActive = true;
+  starsBtn.textContent = '星空 ✨ ON';
+  bg.style.transition = 'background-image 0s, filter 1.5s, opacity 1.5s';
+  bg.style.backgroundImage = "url('Gemini_Generated_Image_17l43e17l43e17l4.png')";
+  bg.style.filter = 'saturate(1.1) brightness(0.85) blur(0px)';
+  bg.style.opacity = '1';
+  // オーバーレイを暗く
+  bg.style.setProperty('--overlay', 'rgba(10,10,30,0.35)');
+  bg.dataset.stars = '1';
+}
+
+function stopStars() {
+  starsActive = false;
+  starsBtn.textContent = '星空 ✨';
+  bg.style.transition = 'filter 1.5s, opacity 1.5s';
+  bg.style.backgroundImage = "url('background.png')";
+  bg.style.filter = 'saturate(0.96) brightness(1.10) blur(2.5px)';
+  bg.style.transform = 'scale(1.05)';
+  delete bg.dataset.stars;
+}
+
+starsBtn.addEventListener('click', () => {
+  starsActive ? stopStars() : startStars();
 });
 </script>
 </body>
