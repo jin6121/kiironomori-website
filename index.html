@@ -358,6 +358,29 @@
   }
   #char-popup-close:hover { background: rgba(0,0,0,0.08); }
   .char-clickable { cursor: pointer; }
+  .char-clickable:hover .char-bob {
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+  }
+  .char-clickable .char-flip {
+    transition: transform 0.15s ease;
+    transform-origin: center bottom;
+  }
+  .char-clickable:hover .char-flip {
+    transform: scale(1.08);
+  }
+  @keyframes char-punyu {
+    0%   { transform: scale(1); }
+    15%  { transform: scale(0.82, 1.18); }
+    30%  { transform: scale(1.15, 0.88); }
+    50%  { transform: scale(0.92, 1.08); }
+    70%  { transform: scale(1.06, 0.96); }
+    85%  { transform: scale(0.97, 1.02); }
+    100% { transform: scale(1); }
+  }
+  .char-clickable .char-flip.char-punyu {
+    animation: char-punyu 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+    transform-origin: center bottom;
+  }
 
   /* ===== 恵の雨ボタン ===== */
   #rain-btn{
@@ -615,12 +638,18 @@ function build() {
 
     items.push({ orbit, flip, bob, bobAnim, phase: c.phase });
 
-    // クリックでキャラ名を表示
+    // クリックでキャラ名を表示 & ぷにゅアニメ
     if (c.label) {
       orbit.classList.add('char-clickable');
       orbit.addEventListener('click', (e) => {
         e.stopPropagation();
         showCharPopup(c, orbit);
+        flip.classList.remove('char-punyu');
+        void flip.offsetWidth;
+        flip.classList.add('char-punyu');
+      });
+      flip.addEventListener('animationend', () => {
+        flip.classList.remove('char-punyu');
       });
     }
 
