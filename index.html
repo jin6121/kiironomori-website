@@ -855,7 +855,7 @@ function createDrop(startY) {
   const img = document.createElement('img');
   img.src = RAIN_IMGS[Math.floor(Math.random() * RAIN_IMGS.length)];
   img.className = 'rain-drop';
-  const size = 18 + Math.random() * 22;
+  const size = 10 + Math.random() * 10;
   img.style.cssText = `width:${size}px; height:auto; position:fixed; pointer-events:none; z-index:68; opacity:0.88;`;
   document.body.appendChild(img);
   return {
