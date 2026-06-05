@@ -79,20 +79,11 @@
   #logo-icon { display: none; }
   #logo-text { display: none; }
 
-  /* モバイル：正方形アイコン＋テキスト */
+  /* モバイル：正方形ロゴのみ */
   @media (max-width: 600px) {
     #logo-full { display: none; }
-    #logo-icon { display: block; width: 110px; height: 110px; }
-    #logo-text {
-      display: block;
-      margin-top: 10px;
-      color: var(--ink);
-      font-size: 18px;
-      font-weight: bold;
-      letter-spacing: 0.14em;
-      line-height: 1.5;
-      text-shadow: 0 1px 2px rgba(255,255,255,0.85);
-    }
+    #logo-icon { display: block; width: 160px; height: auto; }
+    #logo-text { display: none; }
   }
   .tagline{
     margin-top: 18px;
