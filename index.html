@@ -104,22 +104,24 @@
 
   #btn-group{
     position: fixed;
-    left: 50%; bottom: 34px;
+    left: 50%; bottom: 24px;
     transform: translateX(-50%);
     z-index: 30;
     display: flex;
-    gap: 10px;
-    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    width: min(96vw, 520px);
   }
   #btn-group button{
     border: none;
     cursor: pointer;
-    padding: 13px 0;
-    width: 120px;
+    padding: 11px 0;
+    width: clamp(70px, 22vw, 120px);
     border-radius: 999px;
     font-family: inherit;
-    font-size: 15px;
-    letter-spacing: 0.14em;
+    font-size: clamp(11px, 3vw, 15px);
+    letter-spacing: 0.10em;
     color: #fff;
     transition: transform .12s ease, box-shadow .2s ease, background .2s ease;
   }
