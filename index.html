@@ -638,20 +638,19 @@ function build() {
 
     items.push({ orbit, flip, bob, bobAnim, phase: c.phase });
 
-    // クリックでキャラ名を表示 & ぷにゅアニメ
-    if (c.label) {
-      orbit.classList.add('char-clickable');
-      orbit.addEventListener('click', (e) => {
-        e.stopPropagation();
-        showCharPopup(c, orbit);
-        flip.classList.remove('char-punyu');
-        void flip.offsetWidth;
-        flip.classList.add('char-punyu');
-      });
-      flip.addEventListener('animationend', () => {
-        flip.classList.remove('char-punyu');
-      });
-    }
+    // ぷにゅアニメ（全キャラ共通）
+    orbit.classList.add('char-clickable');
+    orbit.addEventListener('click', (e) => {
+      e.stopPropagation();
+      flip.classList.remove('char-punyu');
+      void flip.offsetWidth;
+      flip.classList.add('char-punyu');
+      // ラベルがあるキャラはポップアップも表示
+      if (c.label) showCharPopup(c, orbit);
+    });
+    flip.addEventListener('animationend', () => {
+      flip.classList.remove('char-punyu');
+    });
 
     // 進行方向で左右反転（dance中のみ作動）
     (function loop() {
