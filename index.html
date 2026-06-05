@@ -364,6 +364,15 @@
   #rain-btn:active{ transform: scale(0.96); }
   #rain-btn:disabled{ opacity: 0.55; cursor: default; transform: none; }
 
+  /* ===== 星空ボタン ===== */
+  #stars-btn{
+    background: #1a2a4a;
+    box-shadow: 0 6px 16px rgba(26,42,74,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  #stars-btn:hover{ background: #253a63; box-shadow: 0 8px 20px rgba(26,42,74,0.55), inset 0 1px 0 rgba(255,255,255,0.2); }
+  #stars-btn:active{ transform: scale(0.96); }
+  #stars-btn:disabled{ opacity: 0.55; cursor: default; transform: none; }
+
   /* ===== 恵みの雨キャラクター ===== */
   #rain-character {
     position: fixed;
@@ -435,6 +444,7 @@
   <button id="breeze-btn" type="button">breeze 🌬</button>
   <button id="photo-btn" type="button">光合成 ☀️</button>
   <button id="rain-btn" type="button">恵の雨 ☔️</button>
+  <button id="stars-btn" type="button">星空 ✨</button>
 </div>
 
 <script>
