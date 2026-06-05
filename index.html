@@ -74,16 +74,9 @@
     filter: drop-shadow(0 2px 9px rgba(40,60,20,0.30))
             drop-shadow(0 1px 2px rgba(40,60,20,0.38));
   }
-  /* デスクトップ：横長ロゴのみ */
   #logo-full { width: 260px; height: auto; }
-  #logo-icon { display: none; }
-  #logo-text { display: none; }
-
-  /* モバイル：正方形ロゴのみ */
   @media (max-width: 600px) {
-    #logo-full { display: none; }
-    #logo-icon { display: block; width: 160px; height: auto; }
-    #logo-text { display: none; }
+    #logo-full { width: 160px; }
   }
   .tagline{
     margin-top: 18px;
@@ -483,9 +476,10 @@
 
 <div id="stage">
   <div id="logo-wrap">
-    <img id="logo-full" src="logo.png" alt="合同会社 きいろのもり">
-    <img id="logo-icon" src="logo_icon.png" alt="きいろのもり">
-    <p id="logo-text">合同会社<br>きいろのもり</p>
+    <picture>
+      <source media="(max-width: 600px)" srcset="logo_icon.png">
+      <img id="logo-full" src="logo.png" alt="合同会社 きいろのもり">
+    </picture>
   </div>
 </div>
 
