@@ -999,9 +999,19 @@ starsBtn.addEventListener('click', () => {
 // ===== JUMP =====
 const jumpBtn = document.getElementById('jump-btn');
 jumpBtn.addEventListener('click', () => {
+  // ボタン自身のぷにゅ
   jumpBtn.classList.remove('punyu');
-  void jumpBtn.offsetWidth; // リフロー強制でアニメーションをリセット
+  void jumpBtn.offsetWidth;
   jumpBtn.classList.add('punyu');
+
+  // 全キャラぽよよん（少しずつ時間をずらして波のように）
+  items.forEach((it, i) => {
+    setTimeout(() => {
+      it.flip.classList.remove('char-punyu');
+      void it.flip.offsetWidth;
+      it.flip.classList.add('char-punyu');
+    }, i * 80);
+  });
 });
 jumpBtn.addEventListener('animationend', () => {
   jumpBtn.classList.remove('punyu');
