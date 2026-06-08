@@ -781,8 +781,10 @@ breezeBtn.addEventListener('click', () => {
 const photoBtn  = document.getElementById('photo-btn');
 let   photoOn   = false;
 let   photoTimer= null;
+let   sunOrbitRAF = null;
 const GROW_TIME = 5000;   // 大きくなりきって破裂するまで(ms)
 const MAX_SCALE = 3;      // 最大の大きさ
+const SUN_ORBIT_MS = 2400; // 太陽が一周する時間(ms)
 
 function setCharScale(scale, dur, ease){
   items.forEach(it=>{
@@ -846,17 +848,79 @@ function photoBurst(){
   }, 850);
 }
 
+// 太陽キャラクターがキャラ全体を一周するアニメーション
+function runSunOrbit(callback) {
+  const cx = window.innerWidth  / 2;
+  const cy = window.innerHeight / 2;
+  const rx = Math.min(window.innerWidth  * 0.32, 320) + 90;
+  const ry = Math.min(window.innerHeight * 0.28, 230) + 70;
+  const sunSize = DISP_W;
+
+  const sunEl = document.createElement('div');
+  sunEl.style.cssText = `
+    position:fixed; z-index:75; pointer-events:none;
+    width:${sunSize}px; height:${sunSize}px;
+    background-image:url('char_sun.png');
+    background-size:${sunSize}px ${sunSize}px;
+    background-repeat:no-repeat;
+    filter:drop-shadow(0 0 18px rgba(240,171,61,0.85));
+    transition:transform 0.1s;
+  `;
+  document.body.appendChild(sunEl);
+
+  const start = performance.now();
+
+  function tick(now) {
+    const elapsed = now - start;
+    const progress = elapsed / SUN_ORBIT_MS;
+
+    if (progress >= 1) {
+      sunEl.remove();
+      sunOrbitRAF = null;
+      callback();
+      return;
+    }
+
+    // 上（-π/2）から時計回りで一周
+    const angle = progress * Math.PI * 2 - Math.PI / 2;
+    const x = cx + Math.cos(angle) * rx - sunSize / 2;
+    const y = cy + Math.sin(angle) * ry - sunSize / 2;
+    sunEl.style.left = x + 'px';
+    sunEl.style.top  = y + 'px';
+
+    // 左半分では反転、右半分では正向き
+    const facingLeft = Math.cos(angle) < 0;
+    sunEl.style.transform = facingLeft ? 'scaleX(-1)' : 'scaleX(1)';
+
+    sunOrbitRAF = requestAnimationFrame(tick);
+  }
+
+  sunOrbitRAF = requestAnimationFrame(tick);
+  return sunEl;
+}
+
 photoBtn.addEventListener('click', () => {
   if (!photoOn){
-    // ① どんどん大きくなる
     photoOn = true;
     photoBtn.classList.add('on');
-    setCharScale(MAX_SCALE, GROW_TIME, 'linear');
-    // ③ もう一度押さなければ破裂
-    photoTimer = setTimeout(photoBurst, GROW_TIME);
+
+    // ① 太陽が一周してから大きくなる
+    runSunOrbit(() => {
+      if (!photoOn) return; // 一周中にキャンセルされた場合
+      setCharScale(MAX_SCALE, GROW_TIME, 'linear');
+      photoTimer = setTimeout(photoBurst, GROW_TIME);
+    });
   } else {
-    // ② もう一度押したら通常サイズに戻す
+    // もう一度押したら通常サイズに戻す
     clearTimeout(photoTimer);
+    if (sunOrbitRAF) {
+      cancelAnimationFrame(sunOrbitRAF);
+      sunOrbitRAF = null;
+      // 軌道中の太陽要素を削除
+      document.querySelectorAll('div[style*="char_sun.png"]').forEach(el => {
+        if (el.style.position === 'fixed' && el.style.zIndex === '75') el.remove();
+      });
+    }
     photoOn = false;
     photoBtn.classList.remove('on');
     setCharScale(1, 700, 'ease');
