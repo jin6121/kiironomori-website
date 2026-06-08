@@ -398,6 +398,30 @@
   #stars-btn:active{ transform: scale(0.96); }
   #stars-btn:disabled{ opacity: 0.55; cursor: default; transform: none; }
 
+  /* ===== 流れ星 ===== */
+  .shooting-star {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 69;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 6px 2px rgba(255,255,220,0.9), 0 0 12px 4px rgba(200,220,255,0.5);
+  }
+  .shooting-star::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 2px;
+    transform: translateY(-50%);
+    width: 80px;
+    height: 1.5px;
+    background: linear-gradient(to left, rgba(255,255,220,0.9), transparent);
+  }
+
   /* ===== JUMPボタン ===== */
   #jump-btn {
     background: #e8724a;
@@ -968,6 +992,53 @@ const starsBtn = document.getElementById('stars-btn');
 const bg = document.getElementById('bg');
 let starsActive = false;
 
+let shootingStarTimer = null;
+let shootingStarLoop = null;
+
+function launchShootingStar() {
+  const star = document.createElement('div');
+  star.className = 'shooting-star';
+
+  // 左上エリアからランダムに出発
+  const startX = Math.random() * window.innerWidth * 0.5;
+  const startY = Math.random() * window.innerHeight * 0.3;
+
+  // 右下方向へ（60〜75度）
+  const angle = (60 + Math.random() * 15) * Math.PI / 180;
+  const dist = 300 + Math.random() * 300;
+  const endX = startX + Math.cos(angle) * dist;
+  const endY = startY + Math.sin(angle) * dist;
+  const dur = 600 + Math.random() * 400;
+
+  // 尾の向きを進行方向に合わせる
+  const deg = (angle * 180 / Math.PI);
+  star.style.cssText = `left:${startX}px; top:${startY}px; transform:rotate(${deg}deg);`;
+  document.body.appendChild(star);
+
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min((now - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - t, 2);
+    star.style.left = (startX + (endX - startX) * ease) + 'px';
+    star.style.top  = (startY + (endY - startY) * ease) + 'px';
+    star.style.opacity = t < 0.8 ? '1' : (1 - (t - 0.8) / 0.2);
+    if (t < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      star.remove();
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+function scheduleShootingStars() {
+  if (!starsActive) return;
+  launchShootingStar();
+  // 複数同時に出ることもある
+  if (Math.random() < 0.3) setTimeout(launchShootingStar, 150 + Math.random() * 200);
+  shootingStarLoop = setTimeout(scheduleShootingStars, 1800 + Math.random() * 2500);
+}
+
 function startStars() {
   starsActive = true;
   starsBtn.textContent = '星空 ✨ ON';
@@ -978,6 +1049,8 @@ function startStars() {
   // オーバーレイを暗く
   bg.style.setProperty('--overlay', 'rgba(10,10,30,0.35)');
   bg.dataset.stars = '1';
+  // 背景切り替えから2秒後に流れ星スタート
+  shootingStarTimer = setTimeout(scheduleShootingStars, 2000);
 }
 
 function stopStars() {
@@ -988,6 +1061,10 @@ function stopStars() {
   bg.style.filter = 'saturate(0.96) brightness(1.10) blur(2.5px)';
   bg.style.transform = 'scale(1.05)';
   delete bg.dataset.stars;
+  clearTimeout(shootingStarTimer);
+  clearTimeout(shootingStarLoop);
+  shootingStarTimer = null;
+  shootingStarLoop = null;
 }
 
 starsBtn.addEventListener('click', () => {
