@@ -894,14 +894,15 @@ function runSunOrbit(callback) {
     if (progress < 1) {
       sunOrbitRAF = requestAnimationFrame(tick);
     } else {
-      // offset-path を復元して元の位置に戻す
-      const innerRx = Math.min(window.innerWidth  * 0.32, 320);
-      const innerRy = Math.min(window.innerHeight * 0.28, 230);
-      orbitEl.style.left           = savedLeft;
-      orbitEl.style.top            = savedTop;
-      orbitEl.style.offsetPath     = `ellipse(${innerRx}px ${innerRy}px at 50% 50%)`;
-      orbitEl.style.offsetDistance = savedOffsetDistance;
-      orbitEl.style.animation      = savedAnimation;
+      // 一周後は右上（angle = -π/4）で停止
+      const stopAngle = -Math.PI / 4;
+      const stopX = cx + Math.cos(stopAngle) * rx - sunSize / 2;
+      const stopY = cy + Math.sin(stopAngle) * ry - sunSize / 2;
+      orbitEl.style.left           = stopX + 'px';
+      orbitEl.style.top            = stopY + 'px';
+      // offset-path は解除したまま（left/top で固定）
+      orbitEl.style.offsetPath     = 'none';
+      orbitEl.style.offsetDistance = '';
       sunItem.flip.style.transform = 'scaleX(1)';
       sunOrbitRAF = null;
       callback();
