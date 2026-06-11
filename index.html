@@ -781,8 +781,10 @@ breezeBtn.addEventListener('click', () => {
 const photoBtn  = document.getElementById('photo-btn');
 let   photoOn   = false;
 let   photoTimer= null;
+let   sunOrbitRAF = null;
 const GROW_TIME = 5000;   // 大きくなりきって破裂するまで(ms)
 const MAX_SCALE = 3;      // 最大の大きさ
+const SUN_ORBIT_MS = 2400; // 太陽が一周する時間(ms)
 
 function setCharScale(scale, dur, ease){
   items.forEach(it=>{
@@ -846,17 +848,103 @@ function photoBurst(){
   }, 850);
 }
 
+// 既存の太陽キャラクターがキャラ全体の外側を一周するアニメーション
+function runSunOrbit(callback) {
+  // items内の太陽キャラ（CHARS index 1）を取得
+  const sunItem = items[1];
+  if (!sunItem) { callback(); return; }
+
+  const orbitEl = sunItem.orbit;
+  const cx = window.innerWidth  / 2;
+  const cy = window.innerHeight / 2;
+  // 他キャラの軌道より一回り大きい楕円
+  const rx = Math.min(window.innerWidth  * 0.32, 320) + 90;
+  const ry = Math.min(window.innerHeight * 0.28, 230) + 70;
+  const sunSize = DISP_W;
+
+  // 現在の状態を保存
+  const savedAnimation      = orbitEl.style.animation;
+  const savedOffsetDistance = orbitEl.style.offsetDistance;
+  const savedLeft           = orbitEl.style.left;
+  const savedTop            = orbitEl.style.top;
+
+  // offset-path を一時解除して left/top で自由に動かす
+  orbitEl.style.animation      = 'none';
+  orbitEl.style.offsetPath     = 'none';
+  orbitEl.style.offsetDistance = '';
+
+  // 太陽の初期 phase は 1/6（CHARS配列より）
+  const startAngle = (1 / 6) * Math.PI * 2 - Math.PI / 2;
+  const start = performance.now();
+
+  function tick(now) {
+    const elapsed  = now - start;
+    const progress = Math.min(elapsed / SUN_ORBIT_MS, 1);
+    const angle    = startAngle + progress * Math.PI * 2;
+
+    const x = cx + Math.cos(angle) * rx - sunSize / 2;
+    const y = cy + Math.sin(angle) * ry - sunSize / 2;
+    orbitEl.style.left = x + 'px';
+    orbitEl.style.top  = y + 'px';
+
+    // 進行方向に合わせて左右反転
+    const facingLeft = Math.cos(angle) < 0;
+    sunItem.flip.style.transform = facingLeft ? 'scaleX(-1)' : 'scaleX(1)';
+
+    if (progress < 1) {
+      sunOrbitRAF = requestAnimationFrame(tick);
+    } else {
+      // 一周後は右上（angle = -π/4）で停止
+      const stopAngle = -Math.PI / 4;
+      const stopX = cx + Math.cos(stopAngle) * rx - sunSize / 2;
+      const stopY = cy + Math.sin(stopAngle) * ry - sunSize / 2;
+      orbitEl.style.left           = stopX + 'px';
+      orbitEl.style.top            = stopY + 'px';
+      // offset-path は解除したまま（left/top で固定）
+      orbitEl.style.offsetPath     = 'none';
+      orbitEl.style.offsetDistance = '';
+      sunItem.flip.style.transform = 'scaleX(1)';
+      sunOrbitRAF = null;
+      callback();
+    }
+  }
+
+  sunOrbitRAF = requestAnimationFrame(tick);
+}
+
 photoBtn.addEventListener('click', () => {
   if (!photoOn){
-    // ① どんどん大きくなる
     photoOn = true;
     photoBtn.classList.add('on');
-    setCharScale(MAX_SCALE, GROW_TIME, 'linear');
-    // ③ もう一度押さなければ破裂
-    photoTimer = setTimeout(photoBurst, GROW_TIME);
+
+    // ① 太陽が一周してから大きくなる
+    runSunOrbit(() => {
+      if (!photoOn) return; // 一周中にキャンセルされた場合
+      setCharScale(MAX_SCALE, GROW_TIME, 'linear');
+      photoTimer = setTimeout(photoBurst, GROW_TIME);
+    });
   } else {
-    // ② もう一度押したら通常サイズに戻す
+    // もう一度押したら通常サイズに戻す
     clearTimeout(photoTimer);
+    if (sunOrbitRAF) {
+      cancelAnimationFrame(sunOrbitRAF);
+      sunOrbitRAF = null;
+      // 太陽キャラを元の軌道位置に戻す
+      const sunItem = items[1];
+      if (sunItem) {
+        const innerRx = Math.min(window.innerWidth  * 0.32, 320);
+        const innerRy = Math.min(window.innerHeight * 0.28, 230);
+        const charH   = FULL_H;
+        const cx2     = window.innerWidth  / 2;
+        const cy2     = window.innerHeight / 2;
+        sunItem.orbit.style.left           = (cx2 - DISP_W / 2) + 'px';
+        sunItem.orbit.style.top            = (cy2 - charH / 2)  + 'px';
+        sunItem.orbit.style.offsetPath     = `ellipse(${innerRx}px ${innerRy}px at 50% 50%)`;
+        sunItem.orbit.style.offsetDistance = ((1/6)*100).toFixed(2) + '%';
+        sunItem.orbit.style.animation      = sunItem.bobAnim ? '' : 'none';
+        sunItem.flip.style.transform       = 'scaleX(1)';
+      }
+    }
     photoOn = false;
     photoBtn.classList.remove('on');
     setCharScale(1, 700, 'ease');
