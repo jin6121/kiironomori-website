@@ -178,11 +178,14 @@
   </div>
 
   <script>
-    // ページ表示の2秒後に、静止画から動画へ滑らかに切り替えて輝きを再生
+    // ページ表示直後に動画を再生し、終了後は静止画へ滑らかに切り替える（動画→静止画）
     window.addEventListener('load', function () {
       var hero  = document.getElementById('hero');
       var video = document.getElementById('hero-video');
       if (!hero || !video) return;
+
+      // まず動画を表示した状態にする
+      hero.classList.add('playing');
 
       // 動画終了の少し手前から静止画へフェードバックを開始し、滑らかに戻す
       video.addEventListener('timeupdate', function () {
@@ -195,17 +198,12 @@
         hero.classList.remove('playing');
       });
 
-      setTimeout(function () {
-        video.currentTime = 0;
-        var p = video.play();
-        // 再生開始が確定してから動画をフェードイン（最初のフレームと静止画はほぼ同じなので滑らか）
-        if (p && p.then) {
-          p.then(function () { hero.classList.add('playing'); })
-           .catch(function () { /* 自動再生がブロックされた場合は静止画のまま */ });
-        } else {
-          hero.classList.add('playing');
-        }
-      }, 2000);
+      video.currentTime = 0;
+      var p = video.play();
+      // 自動再生がブロックされた場合は静止画を表示
+      if (p && p.catch) {
+        p.catch(function () { hero.classList.remove('playing'); });
+      }
     });
   </script>
 </body>
