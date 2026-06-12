@@ -85,11 +85,11 @@
   }
   .hero-video {
     z-index: 2;
-    opacity: 0;
+    opacity: 1;
     pointer-events: none;
   }
-  /* 再生中：動画をフェードインして静止画に重ねる */
-  .hero.playing .hero-video { opacity: 1; }
+  /* 動画終了後：動画をフェードアウトして静止画を表示 */
+  .hero.ended .hero-video { opacity: 0; }
 
   h1 {
     font-size: 34px;
@@ -184,25 +184,23 @@
       var video = document.getElementById('hero-video');
       if (!hero || !video) return;
 
-      // まず動画を表示した状態にする
-      hero.classList.add('playing');
-
+      // 初期状態は動画を表示（CSSで opacity:1）。終了時に静止画へフェードする
       // 動画終了の少し手前から静止画へフェードバックを開始し、滑らかに戻す
       video.addEventListener('timeupdate', function () {
         if (video.duration && video.currentTime >= video.duration - 0.7) {
-          hero.classList.remove('playing');
+          hero.classList.add('ended');
         }
       });
       // 念のため、終了時にも確実に静止画へ戻す
       video.addEventListener('ended', function () {
-        hero.classList.remove('playing');
+        hero.classList.add('ended');
       });
 
       video.currentTime = 0;
       var p = video.play();
       // 自動再生がブロックされた場合は静止画を表示
       if (p && p.catch) {
-        p.catch(function () { hero.classList.remove('playing'); });
+        p.catch(function () { hero.classList.add('ended'); });
       }
     });
   </script>
