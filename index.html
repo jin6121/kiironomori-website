@@ -894,10 +894,9 @@ function runSunOrbit(callback) {
     if (progress < 1) {
       sunOrbitRAF = requestAnimationFrame(tick);
     } else {
-      // 一周後は右上（angle = -π/4）で停止
-      const stopAngle = -Math.PI / 4;
-      const stopX = cx + Math.cos(stopAngle) * rx - sunSize / 2;
-      const stopY = cy + Math.sin(stopAngle) * ry - sunSize / 2;
+      // 一周後は画面右端・上寄りで停止
+      const stopX = window.innerWidth - sunSize - 12;
+      const stopY = Math.round(window.innerHeight * 0.08);
       orbitEl.style.left           = stopX + 'px';
       orbitEl.style.top            = stopY + 'px';
       // offset-path は解除したまま（left/top で固定）
