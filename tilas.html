@@ -59,12 +59,129 @@
     box-shadow: 0 12px 40px rgba(60,90,30,0.16);
   }
 
+  /* ===== ヒーロー（ティラスの輝き演出） ===== */
+  .hero {
+    position: relative;
+    width: 300px;
+    max-width: 86%;
+    margin: 0 auto 8px;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 背後の太陽光線（放射） */
+  .hero-rays {
+    position: absolute;
+    inset: -30%;
+    border-radius: 50%;
+    background:
+      repeating-conic-gradient(
+        from 0deg,
+        rgba(255,214,102,0.0)   0deg,
+        rgba(255,214,102,0.85)  3deg,
+        rgba(255,214,102,0.0)   9deg
+      );
+    -webkit-mask-image: radial-gradient(circle, #000 22%, rgba(0,0,0,0.55) 42%, transparent 72%);
+            mask-image: radial-gradient(circle, #000 22%, rgba(0,0,0,0.55) 42%, transparent 72%);
+    opacity: 0;
+    transform: scale(0.4) rotate(0deg);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* 中心のまばゆい光 */
+  .hero-glow {
+    position: absolute;
+    inset: 18%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,248,214,0.95) 0%, rgba(255,221,128,0.55) 45%, rgba(255,221,128,0) 72%);
+    opacity: 0;
+    transform: scale(0.5);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* 左右に伸びる光のビーム */
+  .hero-beam {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 3px;
+    width: 0;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(90deg,
+      rgba(255,238,170,0) 0%,
+      rgba(255,244,200,0.95) 50%,
+      rgba(255,238,170,0) 100%);
+    box-shadow: 0 0 12px 2px rgba(255,238,170,0.8);
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+
   .hero-img {
+    position: relative;
     display: block;
     width: 220px;
-    max-width: 70%;
-    margin: 0 auto 8px;
+    max-width: 73%;
+    z-index: 2;
     filter: drop-shadow(0 8px 20px rgba(60,90,30,0.22));
+    transition: filter 0.6s ease;
+  }
+
+  /* 2秒後に付与される発光クラス */
+  .hero.shining .hero-rays {
+    animation: rays-in 0.8s ease-out forwards, rays-spin 12s linear 0.8s infinite;
+  }
+  .hero.shining .hero-glow {
+    animation: glow-pulse 2.4s ease-in-out 0.4s infinite;
+  }
+  .hero.shining .hero-beam {
+    animation: beam-out 1s ease-out 0.5s forwards, beam-flicker 2.6s ease-in-out 1.5s infinite;
+  }
+  .hero.shining .hero-img {
+    filter:
+      drop-shadow(0 0 16px rgba(255,224,140,0.95))
+      drop-shadow(0 0 38px rgba(255,210,100,0.7))
+      brightness(1.12);
+    animation: char-glow-bob 2.4s ease-in-out 0.4s infinite;
+  }
+
+  @keyframes rays-in {
+    0%   { opacity: 0; transform: scale(0.4) rotate(0deg); }
+    100% { opacity: 0.9; transform: scale(1) rotate(20deg); }
+  }
+  @keyframes rays-spin {
+    from { transform: scale(1) rotate(20deg); }
+    to   { transform: scale(1) rotate(380deg); }
+  }
+  @keyframes glow-pulse {
+    0%,100% { opacity: 0.75; transform: scale(0.95); }
+    50%     { opacity: 1;    transform: scale(1.08); }
+  }
+  @keyframes beam-out {
+    0%   { opacity: 0; width: 0; }
+    60%  { opacity: 1; }
+    100% { opacity: 0.9; width: 150%; }
+  }
+  @keyframes beam-flicker {
+    0%,100% { opacity: 0.9; }
+    50%     { opacity: 0.5; }
+  }
+  @keyframes char-glow-bob {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-6px); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .hero.shining .hero-rays,
+    .hero.shining .hero-glow,
+    .hero.shining .hero-beam,
+    .hero.shining .hero-img { animation: none; }
+    .hero.shining .hero-rays { opacity: 0.9; transform: scale(1) rotate(20deg); }
+    .hero.shining .hero-glow { opacity: 0.9; transform: scale(1); }
   }
 
   h1 {
@@ -117,7 +234,12 @@
     <a class="back-link" href="index.html">← トップへ戻る</a>
 
     <div class="card">
-      <img class="hero-img" src="char_fairy.png" alt="ティラス">
+      <div class="hero" id="hero">
+        <div class="hero-rays"></div>
+        <div class="hero-glow"></div>
+        <div class="hero-beam"></div>
+        <img class="hero-img" src="char_fairy.png" alt="ティラス">
+      </div>
       <h1>ティラス</h1>
 
       <div class="lead">
@@ -147,5 +269,15 @@
       <p class="summary-text">これらが重なり合うことで、神秘的でありながら親しみやすい「ティラス」という名前が完成しました。</p>
     </div>
   </div>
+
+  <script>
+    // ページ表示の2秒後に、ティラスが太陽のように輝き出す
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        var hero = document.getElementById('hero');
+        if (hero) hero.classList.add('shining');
+      }, 2000);
+    });
+  </script>
 </body>
 </html>
