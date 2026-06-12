@@ -355,6 +355,25 @@
     transition: background 0.15s;
   }
   #char-popup-close:hover { background: rgba(0,0,0,0.08); }
+  #char-popup-link {
+    display: none;
+    margin: 14px auto 2px;
+    padding: 8px 18px;
+    background: var(--btn);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(92,138,36,0.3);
+    transition: background 0.15s, transform 0.15s;
+  }
+  #char-popup-link.visible { display: block; }
+  #char-popup-link:hover { background: var(--btn-dk); transform: translateY(-1px); }
   .char-clickable { cursor: pointer; }
   .char-clickable:hover .char-bob {
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
@@ -508,6 +527,7 @@
     <button id="char-popup-close" type="button">✕</button>
     <div id="char-popup-name"></div>
     <div id="char-popup-desc"></div>
+    <a id="char-popup-link" href="#"></a>
   </div>
 </div>
 
@@ -538,7 +558,9 @@ const CHARS = [
   { name:'leaf',  bodyAnim:'body-sway',   legAnim:'legs-still',  bodyDur:3.20, legDur:1.00, phase:3/6, full:true },
   { name:'fairy', bodyAnim:'body-fairy',  legAnim:'legs-fairy',  bodyDur:4.20, legDur:2.10, phase:4/6, full:true,
     label:'ティラス',
-    desc:'パワースポットの聖なるエネルギーが滴り落ちた「光の雫」から生まれた妖精。\n自然が編み上げた「光のティアラ」を頭に戴き、ノッティや仲間たちの行く先を温かく照らします。\n頭の勾玉には特別な秘密が隠されているとか…✨'
+    desc:'パワースポットの聖なるエネルギーが滴り落ちた「光の雫」から生まれた妖精。\n自然が編み上げた「光のティアラ」を頭に戴き、ノッティや仲間たちの行く先を温かく照らします。\n頭の勾玉には特別な秘密が隠されているとか…✨',
+    link:'tilas.html',
+    linkLabel:'ティラスの紹介ページへ →'
   },
   { name:'trees', bodyAnim:'body-spin',   legAnim:'legs-still',  bodyDur:5.00, legDur:1.00, phase:5/6, full:true },
 ];
@@ -956,11 +978,21 @@ const popup      = document.getElementById('char-popup');
 const popupName  = document.getElementById('char-popup-name');
 const popupDesc  = document.getElementById('char-popup-desc');
 const popupClose = document.getElementById('char-popup-close');
+const popupLink  = document.getElementById('char-popup-link');
 
 function showCharPopup(charDef, orbitEl) {
   const rect = orbitEl.getBoundingClientRect();
   popupName.textContent = charDef.label;
   popupDesc.innerHTML = charDef.desc.replace(/\n/g, '<br>');
+
+  // 紹介ページへのリンクボタン
+  if (charDef.link) {
+    popupLink.href = charDef.link;
+    popupLink.textContent = charDef.linkLabel || '紹介ページへ →';
+    popupLink.classList.add('visible');
+  } else {
+    popupLink.classList.remove('visible');
+  }
 
   // ポップアップの位置：キャラの上に表示、画面端を考慮
   popup.style.left = '0';

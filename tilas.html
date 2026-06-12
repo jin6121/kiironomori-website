@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ティラス紹介 ｜ 合同会社 きいろのもり</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png">
+<style>
+  :root{
+    --ink:    #3f5a2c;
+    --ink-sub:#6f8a52;
+    --btn:    #7fae3a;
+    --btn-dk: #5c8a24;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Hiragino Maru Gothic ProN', 'Kosugi Maru', sans-serif;
+    color: var(--ink);
+    background:
+      linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)),
+      url('background.png') center center / cover no-repeat fixed;
+    min-height: 100vh;
+    line-height: 1.9;
+    letter-spacing: 0.04em;
+  }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 8px 18px;
+    background: rgba(255,255,255,0.8);
+    color: var(--ink-sub);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(60,90,30,0.12);
+    transition: background 0.15s, transform 0.15s;
+  }
+  .back-link:hover { background: #fff; transform: translateY(-1px); }
+
+  .card {
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(127,174,58,0.30);
+    border-radius: 28px;
+    padding: 40px 32px;
+    box-shadow: 0 12px 40px rgba(60,90,30,0.16);
+  }
+
+  .hero-img {
+    display: block;
+    width: 220px;
+    max-width: 70%;
+    margin: 0 auto 8px;
+    filter: drop-shadow(0 8px 20px rgba(60,90,30,0.22));
+  }
+
+  h1 {
+    font-size: 34px;
+    text-align: center;
+    letter-spacing: 0.22em;
+    margin-bottom: 24px;
+  }
+
+  .lead p { margin-bottom: 20px; }
+
+  h2 {
+    font-size: 20px;
+    color: var(--btn-dk);
+    letter-spacing: 0.12em;
+    margin: 36px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px dashed rgba(127,174,58,0.4);
+  }
+
+  .origin {
+    list-style: none;
+    display: grid;
+    gap: 14px;
+  }
+  .origin li {
+    background: rgba(127,174,58,0.10);
+    border-radius: 16px;
+    padding: 14px 18px;
+  }
+  .origin .term {
+    display: block;
+    font-weight: bold;
+    color: var(--btn-dk);
+    margin-bottom: 4px;
+  }
+
+  .summary-text {
+    margin-top: 20px;
+  }
+
+  @media (max-width: 480px){
+    .card { padding: 28px 20px; }
+    h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back-link" href="index.html">← トップへ戻る</a>
+
+    <div class="card">
+      <img class="hero-img" src="char_fairy.png" alt="ティラス">
+      <h1>ティラス</h1>
+
+      <div class="lead">
+        <p>ティラスは、パワースポットの神聖なエネルギーが極限まで高まり、ポトリと滴り落ちた「光の雫（Tear）」から生まれました。</p>
+
+        <p>その誕生を祝福するように、周囲の植物たちが自然と絡み合って編み上げられたのが、頭に乗せている「光のティアラ（Tiara）」です。</p>
+
+        <p>太陽の神様「アマテラス」のような温かく強大なパワーを宿したその雫は、冠を戴くことで姿を持ち、ノッティや仲間たちの行く先を明るく「照らす」存在として、いつしか『ティラス』と呼ばれるようになりました。</p>
+      </div>
+
+      <h2>言葉の成り立ちのまとめ</h2>
+      <ul class="origin">
+        <li>
+          <span class="term">Tear（ティアー）</span>
+          始まりの姿である「光の雫」
+        </li>
+        <li>
+          <span class="term">Tiara（ティアラ）</span>
+          自然から贈られた「祝福の冠」
+        </li>
+        <li>
+          <span class="term">Amaterasu / 照らす</span>
+          周りを温かく導く「太陽の神様のような力」
+        </li>
+      </ul>
+
+      <p class="summary-text">これらが重なり合うことで、神秘的でありながら親しみやすい「ティラス」という名前が完成しました。</p>
+    </div>
+  </div>
+</body>
+</html>
